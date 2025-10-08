@@ -8,21 +8,15 @@ It deploys a PyTorch-based MobileNetV2 image classifier on **AWS SageMaker Serve
 ## 🏗️ Architecture (High-Level)
 
 ```mermaid
-graph TD
-  A[User uploads image<br>via browser] --> B[S3 static website<br>(ml-demo.store)]
-  B --> C[API Gateway<br>HTTP POST /predict]
-  C --> D[Lambda Proxy<br>(Python 3.12)]
-  D --> E[SageMaker Serverless<br>Endpoint (MobileNetV2)]
+flowchart TD
+  A["User uploads image<br/>via browser"] --> B["Amazon S3<br/>Static website ml-demo.store"]
+  B --> C["Amazon API Gateway<br/>HTTP POST /predict"]
+  C --> D["AWS Lambda<br/>Proxy (Python 3.12)"]
+  D --> E["Amazon SageMaker<br/>Serverless Endpoint<br/>MobileNet V2"]
   E --> D
   D --> C
   C --> B
   B --> A
-  subgraph AWS Infrastructure
-  B
-  C
-  D
-  E
-  end
 ```
 
 ---
