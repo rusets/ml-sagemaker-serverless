@@ -43,8 +43,6 @@ flowchart LR
 
 ## 📁 Project Structure (clean)
 
-> State files are **not** committed. Terraform state is stored remotely in **S3 + DynamoDB** (see next section).
-
 ```plaintext
 .
 ├── frontend/
@@ -72,6 +70,8 @@ flowchart LR
 └── README.md
 ```
 
+> Terraform stores its infrastructure state remotely in **Amazon S3** (AES-256 encrypted) with **DynamoDB table for state locking**, ensuring consistency and preventing concurrent apply operations.
+
 ---
 
 ## 🗄️ Terraform State (S3 + DynamoDB)
@@ -89,6 +89,25 @@ terraform {
     dynamodb_table = "ml-sagemaker-serverless"
   }
 }
+```
+
+**Backend Setup**
+```bash
+# Create S3 bucket for Terraform state
+aws s3api create-bucket   --bucket tfstate-ml-sagemaker-serverless   --region us-east-1
+
+# Enable versioning to keep state history
+aws s3api put-bucket-versioning   --bucket tfstate-ml-sagemaker-serverless   --versioning-configuration Status=Enabled
+
+# Enable encryption at rest (AES256)
+aws s3api put-bucket-encryption   --bucket tfstate-ml-sagemaker-serverless   --server-side-encryption-configuration '{
+    "Rules": [{
+      "ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}
+    }]
+  }'
+
+# Create DynamoDB table for state locking
+aws dynamodb create-table   --table-name ml-sagemaker-serverless   --attribute-definitions AttributeName=LockID,AttributeType=S   --key-schema AttributeName=LockID,KeyType=HASH   --billing-mode PAY_PER_REQUEST   --region us-east-1
 ```
 
 **Initialize / migrate state**
