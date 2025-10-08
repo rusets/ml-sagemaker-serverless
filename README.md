@@ -1,149 +1,42 @@
-# SageMaker Serverless Demo (Mobilenet V2)
+# ML SageMaker Serverless — Mobilenet V2 Demo
 
-![Terraform](https://img.shields.io/badge/IaC-Terraform-7B42BC?logo=terraform&logoColor=white)
-![AWS](https://img.shields.io/badge/Cloud-AWS-FF9900?logo=amazonaws&logoColor=white)
-![Python](https://img.shields.io/badge/Language-Python-3776AB?logo=python&logoColor=white)
-![Serverless](https://img.shields.io/badge/Architecture-Serverless-FF4F00?logo=awslambda&logoColor=white)
-![SageMaker](https://img.shields.io/badge/AI-SageMaker-232F3E?logo=amazonaws&logoColor=white)
+This project demonstrates a **fully automated AWS ML inference pipeline** using Terraform and GitHub Actions.  
+It deploys a PyTorch-based MobileNetV2 image classifier on **AWS SageMaker Serverless**, fronted by an **API Gateway + Lambda proxy**, and served through a static **CloudFront + S3 website**.
 
 ---
 
-### 🌐 Live Demo
-- **Website:** [https://ml-demo.store/](https://ml-demo.store/)
-- **API Endpoint:** [`/predict`](https://222izyufsl.execute-api.us-east-1.amazonaws.com/predict)
-- **Model:** Mobilenet V2 (Image Classification)
-
----
-
-## 📋 Overview
-
-This project demonstrates an **end-to-end serverless image classification pipeline** on AWS.  
-It uses **Amazon SageMaker Serverless Inference** to host the pre-trained **Mobilenet V2** model, integrated with **API Gateway**, **Lambda**, and a **static web UI** deployed via **S3 + CloudFront** — all provisioned automatically with **Terraform**.
-
-The goal is to show how to deploy a **production-ready ML inference system** that’s fast, scalable, and cost-efficient — perfect for portfolios, demos, or internal proof-of-concept setups.
-
----
-
-## 🏗️ Architecture (high-level)
+## 🏗️ Architecture (High-Level)
 
 ```mermaid
-flowchart LR
-  %% Node styles
-  classDef svc fill:#f8f9ff,stroke:#6366f1,stroke-width:1.5,rx:10,ry:10,color:#111827
-  classDef ext fill:#fff7ed,stroke:#fb923c,stroke-width:1.5,rx:10,ry:10,color:#111827
-  classDef iac fill:#eef2ff,stroke:#7c3aed,stroke-width:1.5,rx:10,ry:10,color:#111827
-  classDef data fill:#ecfdf5,stroke:#10b981,stroke-width:1.5,rx:10,ry:10,color:#111827
-
-  %% Frontend
-  user((User / Browser)):::ext --> cf["Amazon CloudFront"]:::svc
-  cf --> s3["Amazon S3<br/>Static site + config.js"]:::data
-
-  %% API Layer
-  cf --> apigw["Amazon API Gateway<br/>HTTP API"]:::svc
-  apigw --> lam["AWS Lambda<br/>Inference Proxy"]:::svc
-  lam --> sm["Amazon SageMaker<br/>Serverless Endpoint<br/>Mobilenet V2"]:::svc
-  sm -->|JSON Response| user
-
-  %% IaC & CI/CD
-  subgraph IaC_CICD [Infrastructure as Code / CI-CD]
-    gh["GitHub Actions"]:::ext --> tf["Terraform"]:::iac
+graph TD
+  A[User uploads image<br>via browser] --> B[S3 static website<br>(ml-demo.store)]
+  B --> C[API Gateway<br>HTTP POST /predict]
+  C --> D[Lambda Proxy<br>(Python 3.12)]
+  D --> E[SageMaker Serverless<br>Endpoint (MobileNetV2)]
+  E --> D
+  D --> C
+  C --> B
+  B --> A
+  subgraph AWS Infrastructure
+  B
+  C
+  D
+  E
   end
-  tf -.-> s3
-  tf -.-> cf
-  tf -.-> apigw
-  tf -.-> lam
-  tf -.-> sm
 ```
 
 ---
 
-## ⚙️ How It Works
+## 📁 Project Structure
 
-1️⃣ **User** opens the static web UI (`index.html` + `script.js`) served via **CloudFront + S3**.  
-2️⃣ `config.js` contains the API URL (no-cache headers).  
-3️⃣ The browser sends an image URL to `POST /predict` on **API Gateway**.  
-4️⃣ **Lambda (inference proxy)** receives the request and invokes the **SageMaker Serverless Endpoint**.  
-5️⃣ **SageMaker** runs inference using the **Mobilenet V2** model.  
-6️⃣ The **predicted class and probability** are returned as a JSON response to the UI.
-
----
-
-## 🚀 Deployment (Terraform)
-
-**Prerequisites**
-- AWS CLI configured
-- Terraform ≥ 1.5
-- A pre-trained `model.tar.gz` (Mobilenet V2) in the `infra/` directory
-
-```bash
-cd infra
-terraform init
-terraform apply -auto-approve
-```
-
-The comments for the commands above are intentionally placed below the block per your style preference.
-
-Terraform provisions:
-- IAM roles for Lambda and SageMaker  
-- S3 bucket + CloudFront distribution  
-- API Gateway (HTTP API) and Lambda integration  
-- SageMaker model + endpoint (serverless)  
-- Uploads `config.js` and invalidates CloudFront cache
-
----
-
-## 💰 Cost Optimization
-
-This architecture is designed to **minimize cost while maintaining scalability and reliability**.  
-All components are **event-driven** and **pay-per-use**, ensuring there are no idle infrastructure charges.
-
-| Service | Optimization | Description |
-|----------|---------------|-------------|
-| **Amazon SageMaker** | **Serverless Inference** | The model is deployed on a fully managed serverless endpoint — you pay only for the time your model is processing requests (measured in milliseconds). No EC2 instances or persistent compute required. |
-| **AWS Lambda** | **Ephemeral compute** | Lambda runs only when an inference request arrives. Memory and timeout are tuned for minimal billing while keeping latency low. |
-| **Amazon API Gateway** | **HTTP API** | Uses the lightweight HTTP API variant (instead of REST API) — ~70% cheaper per million requests. |
-| **Amazon CloudFront** | **Global CDN Caching** | Frequently accessed static files and the web UI are cached at edge locations, minimizing S3 data transfer and improving latency worldwide. |
-| **Amazon S3** | **Static Website Hosting** | The frontend is hosted as static assets with negligible cost — no servers, no runtime. |
-| **Terraform** | **On-demand deployment** | The entire environment can be created and destroyed with a single command (`terraform apply` / `destroy`), so you only pay for usage during testing or demonstrations. |
-
-💡 *Result:* The entire pipeline typically costs **less than $1/month** under light demo traffic — yet it remains highly scalable for production-level workloads.
-
----
-
-## 🔮 Future Improvements
-
-- Automated **CI/CD** via GitHub Actions (plan/apply workflows)  
-- **Cognito** authentication for `/predict` requests  
-- **CloudWatch dashboards** for real-time metrics  
-- **Multi-model endpoint** deployment pattern  
-- Optional **SVG diagram** for ultra-sharp zoom in docs
-
----
-
-## 🧰 Tech Stack
-
-| Category | Technology |
-|-----------|-------------|
-| **Infrastructure** | AWS (SageMaker, Lambda, API Gateway, S3, CloudFront, IAM) |
-| **IaC** | Terraform |
-| **CI/CD** | GitHub Actions |
-| **Language** | Python 3.10 (Lambda + inference) |
-| **Frontend** | HTML, CSS, JavaScript |
-| **Model** | Mobilenet V2 (Image classification) |
-
----
-
-## 📂 Folder Structure
-
-```
-ml-sagemaker-serverless/
-├── frontend/
+```plaintext
+.
+├── frontend
 │   ├── index.html
-│   ├── out.json
 │   ├── script.js
 │   ├── style.css
 │   └── thomas.png
-├── infra/
+├── infra
 │   ├── api_and_config.tf
 │   ├── existing.tf
 │   ├── iam_lambda_invoke.tf
@@ -152,36 +45,75 @@ ml-sagemaker-serverless/
 │   ├── outputs.tf
 │   ├── providers.tf
 │   ├── sagemaker_deploy.tf
-│   ├── terraform.tfstate
-│   ├── terraform.tfstate.backup
 │   └── variables.tf
-├── mobilenet_sls/
-│   └── code/
+├── mobilenet_sls
+│   └── code
 │       ├── inference.py
 │       └── requirements.txt
-├── scripts/
+├── scripts
 │   └── inference_proxy.py
-└── terraform.tfstate
+└── README.md
 ```
 
 ---
 
-## 🧹 Cleanup
+## ⚙️ Core Components
 
-```bash
-cd infra
-terraform destroy -auto-approve
-```
-
-The comment for the command above is intentionally placed below the block per your style preference.
-
----
-
-## 🪪 License
-
-MIT — Free to use, modify, and deploy for demos, learning, or portfolio purposes.
+- **Frontend** — simple static website hosted on S3 + CloudFront (`https://ml-demo.store/`).
+- **Lambda Proxy** — lightweight Python function to relay API calls to SageMaker.
+- **SageMaker Endpoint** — serverless inference model (`mobilenet-v2-sls`).
+- **API Gateway** — HTTP API v2 used for `/predict` route.
+- **Terraform IaC** — manages entire stack reproducibly.
+- **GitHub Actions (CI/CD)** — deploys and updates automatically.
 
 ---
 
-> 💡 **Project purpose:** Showcase how to deploy a real ML model using AWS Serverless architecture with Terraform automation.  
-> Ideal for DevOps and Cloud Engineer portfolios.
+## 🔒 Security & IAM
+
+This project follows AWS security best practices:
+
+- **KMS (Key Management Service):**
+  - The Lambda update process (`lambda_kms_clear`) safely clears and reapplies encryption keys during redeploys.
+  - Environment variables are reset in controlled sequence to avoid stale or mismatched KMS bindings.
+
+- **IAM Roles:**
+  - **SageMaker Execution Role** (`*-sagemaker-exec`) — minimal permissions to pull containers from ECR and read model artifacts from S3.
+  - **Lambda Execution Role** (`*-lambda-exec`) — includes only one inline policy: `sagemaker:InvokeEndpoint` for a specific SageMaker endpoint ARN.
+  - **GitHub OIDC Role** — short-lived access for CI/CD without long-term AWS credentials.
+
+This strict IAM separation and dynamic KMS handling ensures secure, auditable deployments.
+
+---
+
+## 💰 Cost Optimization
+
+- **SageMaker Serverless** — billed per inference request (no cost when idle).
+- **Lambda + API Gateway** — minimal usage-based pricing, automatically scaled to zero.
+- **S3 + CloudFront** — Free Tier friendly; assets cached globally.
+- **Model artifact (~14 MB)** — stored once in S3; versioned by timestamp.
+- **Automatic sleep/wake pattern** — SageMaker endpoints incur no hourly cost between invocations.
+
+Average monthly cost (for a small demo): **under $1.50/month**.
+
+---
+
+## 🌐 Live Demo
+
+**Website:** [ml-demo.store](https://ml-demo.store/)  
+**API Endpoint:** [https://222izyufsl.execute-api.us-east-1.amazonaws.com/predict](https://222izyufsl.execute-api.us-east-1.amazonaws.com/predict)  
+**GitHub Repo:** [github.com/rusets/ml-sagemaker-serverless](https://github.com/rusets/ml-sagemaker-serverless)
+
+---
+
+## 🧩 Tech Stack
+
+**AWS:** SageMaker, Lambda, API Gateway, CloudFront, S3, IAM, KMS  
+**Infra:** Terraform (v1.6+), AWS Provider (v5.50+)  
+**Model:** MobileNetV2 (PyTorch, ImageNet pre-trained)  
+**Frontend:** HTML / CSS / JS — lightweight and responsive
+
+---
+
+## 📜 License
+
+MIT © 2025 Ruslan Dashkin
