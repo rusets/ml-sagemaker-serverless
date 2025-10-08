@@ -94,16 +94,19 @@ Terraform provisions:
 
 ## 💰 Cost Optimization
 
+This architecture is designed to **minimize cost while maintaining scalability and reliability**.  
+All components are **event-driven** and **pay-per-use**, ensuring there are no idle infrastructure charges.
+
 | Service | Optimization | Description |
 |----------|---------------|-------------|
-| **SageMaker** | Serverless Endpoint | Pay only for invocation time |
-| **Lambda** | On-demand | Scales automatically with traffic |
-| **CloudFront** | CDN caching | Reduces S3 GETs and latency |
-| **S3** | Static site | Extremely low-cost hosting |
-| **API Gateway** | HTTP API | Cheaper and faster than REST |
-| **Terraform** | Destroy when idle | Clean teardown stops billing |
+| **Amazon SageMaker** | **Serverless Inference** | The model is deployed on a fully managed serverless endpoint — you pay only for the time your model is processing requests (measured in milliseconds). No EC2 instances or persistent compute required. |
+| **AWS Lambda** | **Ephemeral compute** | Lambda runs only when an inference request arrives. Memory and timeout are tuned for minimal billing while keeping latency low. |
+| **Amazon API Gateway** | **HTTP API** | Uses the lightweight HTTP API variant (instead of REST API) — ~70% cheaper per million requests. |
+| **Amazon CloudFront** | **Global CDN Caching** | Frequently accessed static files and the web UI are cached at edge locations, minimizing S3 data transfer and improving latency worldwide. |
+| **Amazon S3** | **Static Website Hosting** | The frontend is hosted as static assets with negligible cost — no servers, no runtime. |
+| **Terraform** | **On-demand deployment** | The entire environment can be created and destroyed with a single command (`terraform apply` / `destroy`), so you only pay for usage during testing or demonstrations. |
 
-💡 *Tip:* Ideal for demos or learning — infrastructure can be fully destroyed with one command when not in use.
+💡 *Result:* The entire pipeline typically costs **less than $1/month** under light demo traffic — yet it remains highly scalable for production-level workloads.
 
 ---
 
