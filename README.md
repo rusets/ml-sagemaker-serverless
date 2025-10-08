@@ -41,7 +41,7 @@ flowchart LR
 
 ---
 
-## 📁 Project Structure (clean)
+## 📁 Project Structure
 
 ```plaintext
 .
@@ -70,70 +70,25 @@ flowchart LR
 └── README.md
 ```
 
-> Terraform stores its infrastructure state remotely in **Amazon S3** (AES-256 encrypted) with **DynamoDB table for state locking**, ensuring consistency and preventing concurrent apply operations.
+> Terraform stores its infrastructure state remotely in **Amazon S3** (AES‑256 encrypted) and uses **DynamoDB for state locking**, ensuring consistency and safe collaboration during deployments.
 
 ---
 
-## 🗄️ Terraform State (S3 + DynamoDB)
+## 🔒 Security & IAM
 
-Remote backend keeps the state centralized, versioned, and locked against concurrent runs.
-
-**`infra/backend.tf`**
-```hcl
-terraform {
-  backend "s3" {
-    bucket         = "tfstate-ml-sagemaker-serverless"
-    key            = "terraform/state.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "ml-sagemaker-serverless"
-  }
-}
-```
-
-**Backend Setup**
-```bash
-# Create S3 bucket for Terraform state
-aws s3api create-bucket   --bucket tfstate-ml-sagemaker-serverless   --region us-east-1
-
-# Enable versioning to keep state history
-aws s3api put-bucket-versioning   --bucket tfstate-ml-sagemaker-serverless   --versioning-configuration Status=Enabled
-
-# Enable encryption at rest (AES256)
-aws s3api put-bucket-encryption   --bucket tfstate-ml-sagemaker-serverless   --server-side-encryption-configuration '{
-    "Rules": [{
-      "ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}
-    }]
-  }'
-
-# Create DynamoDB table for state locking
-aws dynamodb create-table   --table-name ml-sagemaker-serverless   --attribute-definitions AttributeName=LockID,AttributeType=S   --key-schema AttributeName=LockID,KeyType=HASH   --billing-mode PAY_PER_REQUEST   --region us-east-1
-```
-
-**Initialize / migrate state**
-```bash
-cd infra
-terraform init
-# Answer "yes" to copy existing local state to S3
-```
-
----
-
-## 🔒 Security & IAM (summary)
-
-- **KMS & Lambda env:** deployment pipeline resets KMS binding and environment variables in a controlled order to avoid stale encryption state during updates.
-- **Least‑privilege IAM:**
-  - *SageMaker execution role* — read model artifacts from S3 and pull images from ECR (read‑only).
-  - *Lambda execution role* — only `sagemaker:InvokeEndpoint` on the specific endpoint ARN.
+- **KMS & Lambda env:** deployment pipeline resets KMS binding and environment variables in a controlled order to avoid stale encryption state during updates.  
+- **Least‑privilege IAM:**  
+  - *SageMaker execution role* — read model artifacts from S3 and pull images from ECR (read‑only).  
+  - *Lambda execution role* — only `sagemaker:InvokeEndpoint` on the specific endpoint ARN.  
   - *API Gateway → Lambda permission* — scoped to `POST /predict` for this API.
 
 ---
 
 ## 💰 Cost Optimization
 
-- **SageMaker Serverless** — pay per request (ms). No idle compute.
-- **Lambda + HTTP API** — usage‑based, scales to zero.
-- **CloudFront + S3** — low‑cost global static hosting with caching.
+- **SageMaker Serverless** — pay per request (ms). No idle compute.  
+- **Lambda + HTTP API** — usage‑based, scales to zero.  
+- **CloudFront + S3** — low‑cost global static hosting with caching.  
 - **Config autogen** — `config.js` uploaded with `no-cache` + CloudFront invalidation.
 
 ---
