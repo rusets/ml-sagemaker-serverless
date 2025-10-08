@@ -1,50 +1,45 @@
-# ---- Terraform ----
+# --- Terraform ---
+**/.terraform/*
 *.tfstate
-*.tfstate.backup
-.terraform/
-.terraform.lock.hcl
+*.tfstate.*
 crash.log
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
 
-# ---- Model artifacts ----
-*.tar.gz
-models/
-infra/model.tar.gz
-mobilenet_sls/model.tar.gz
+# Keep the lock file committed (best practice)
+#! .terraform.lock.hcl
 
-# ---- Python cache ----
+# --- Python (lambda/inference) ---
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 *.egg-info/
-*.egg
+.venv/
+venv/
+.env
+.env.*
 
-# ---- MacOS junk ----
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# ---- Logs & temp ----
-*.log
-*.tmp
-*.swp
-
-# ---- Node/Frontend ----
+# --- Node / Frontend ---
 node_modules/
 dist/
-package-lock.json
-yarn.lock
+build/
 
-# ---- IDE / Editor ----
-.vscode/
+# --- OS / Editors ---
+.DS_Store
+Thumbs.db
 .idea/
-*.code-workspace
+.vscode/
+*.swp
+*.swo
 
-# ---- Other local ----
-*.zip
+# --- Logs / temp ---
+*.log
+*.tmp
 *.bak
-*.old
+
+# --- Archives (keep model if stored intentionally) ---
+# *.tar.gz
+# *.zip
