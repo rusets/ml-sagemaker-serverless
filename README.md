@@ -23,21 +23,27 @@ It uses **Amazon SageMaker Serverless Inference** to host a pre‑trained **Mobi
 ## 🏗️ Architecture (High‑Level)
 
 ```mermaid
-flowchart LR
+flowchart TD
   classDef svc fill:#f8f9ff,stroke:#6366f1,stroke-width:1.2,rx:8,ry:8,color:#111827
   classDef ext fill:#fff7ed,stroke:#fb923c,stroke-width:1.2,rx:8,ry:8,color:#111827
   classDef data fill:#ecfdf5,stroke:#10b981,stroke-width:1.2,rx:8,ry:8,color:#111827
+  classDef infra fill:#eef2ff,stroke:#818cf8,stroke-width:1.2,rx:8,ry:8,color:#1e1b4b
 
   user((User / Browser)):::ext --> cf["Amazon CloudFront"]:::svc
   cf --> s3["Amazon S3<br/>Static site + config.js"]:::data
-
   cf --> apigw["Amazon API Gateway<br/>HTTP API"]:::svc
   apigw --> lam["AWS Lambda<br/>Proxy (Python 3.12)"]:::svc
   lam --> sm["Amazon SageMaker<br/>Serverless Endpoint<br/>Mobilenet V2"]:::svc
-  sm -->|JSON Top‑5| user
+  sm -->|JSON Top-5| user
+  tf["Terraform<br/>IaC Automation"]:::infra --> cf
+  tf --> apigw
+  tf --> lam
+  tf --> sm
+  tf --> s3
 ```
 
-**Flow:** user opens the static site (CloudFront → S3) → sends `POST /predict` via API Gateway → Lambda forwards to **SageMaker Serverless** → predictions (Top‑5) returned to the browser.
+**Flow:** user opens the static site (CloudFront → S3) → sends `POST /predict` via API Gateway → Lambda forwards to **SageMaker Serverless** → predictions (Top‑5) returned to the browser.  
+All infrastructure is provisioned and managed by **Terraform** with remote state stored in **S3 (AES‑256 encrypted)** and **DynamoDB** for state locking.
 
 ---
 
