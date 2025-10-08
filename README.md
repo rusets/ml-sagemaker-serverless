@@ -1,167 +1,220 @@
-# 🧠 SageMaker Serverless Demo (Mobilenet V2)
+# 🚀 docker-ecs-deployment
 
-![Terraform](https://img.shields.io/badge/IaC-Terraform-7B42BC?logo=terraform&logoColor=white)
-![AWS](https://img.shields.io/badge/Cloud-AWS-FF9900?logo=amazonaws&logoColor=white)
-![Python](https://img.shields.io/badge/Language-Python-3776AB?logo=python&logoColor=white)
-![Serverless](https://img.shields.io/badge/Architecture-Serverless-FF4F00?logo=awslambda&logoColor=white)
-![SageMaker](https://img.shields.io/badge/AI-SageMaker-232F3E?logo=amazonaws&logoColor=white)
+Spin up a **zero-cost-at-idle** demo app on **AWS ECS Fargate** without an ALB.  
+Traffic goes to a **public task IP**, the service **auto-sleeps to 0**, and a small **“wake”** Lambda behind **API Gateway** starts it on demand. Domain: **https://ecs-demo.online**.
 
 ---
 
-## 📋 Overview
+## 📦 What you get
 
-**SageMaker Serverless Demo (Mobilenet V2)** is a fully serverless image classification application that demonstrates how to deploy and expose a pre-trained ML model on AWS using Terraform.
+- **Node.js demo app** (Express) with a slick UI (dark/light), live logs (SSE), and simple actions.
+- **ECR** repository to store your images.
+- **VPC** with two public subnets, **security group**, **ECS cluster**, **Fargate service**.
+- **Wake API**: API Gateway → Lambda (Python) that scales the service to **1** and redirects to the task IP.
+- **Auto-sleep**: EventBridge rule → Lambda (Python) that scales the service to **0** after inactivity.
+- **GitHub Actions** (3 workflows):
+  - **CI**: Build & push to ECR.
+  - **CD**: Terraform apply / destroy and roll service to a new image.
+  - **OPS**: Wake or Sleep the service on demand.
 
-It combines **Amazon SageMaker Serverless Endpoints**, **AWS Lambda**, **API Gateway**, **Amazon S3**, and **CloudFront** to deliver a cost-efficient, scalable, and production-ready architecture.
-
----
-
-## 🏗️ Architecture
-
-<!-- ARCH_SCROLL_START -->
-<div style="max-width:100%; max-height:520px; overflow:auto; border:1px solid #e5e7eb; border-radius:8px;">
-  <a href="./docs/sagemaker-serverless-annotated.png">
-    <img src="./docs/sagemaker-serverless-annotated.png" alt="AWS Architecture Diagram" width="2400">
-  </a>
-</div>
-<p align="center"><em>Tip: scroll inside the frame to pan; click to open full-size and zoom.</em></p>
-<!-- ARCH_SCROLL_END -->
-  <img src="./docs/sagemaker-serverless-annotated.png" alt="AWS Architecture Diagram" width="900"/>
-<!-- ARCH_SCROLL_END -->
-
-### Flow Summary
-
-1. **User** opens the web UI served via **S3 + CloudFront**.  
-2. The frontend JavaScript loads `config.js` with the latest API URL.  
-3. The browser calls `POST /predict` → **API Gateway (HTTP)**.  
-4. **Lambda (inference proxy)** forwards the image URL to **SageMaker Serverless Endpoint**.  
-5. The **Mobilenet V2** model predicts the image label.  
-6. The result is returned to the browser as JSON.
+> ✅ **Minimal state**: All Terraform is in `infra/main.tf` (no split files).
 
 ---
 
-## ✨ Features
+## 🧭 Repository structure
 
-- Fully **serverless architecture**
-- **Pay-per-inference** cost model (no idle compute)
-- Automated deployment via **Terraform**
-- **Secure IAM roles** with least privilege
-- **Static website hosting** with CloudFront CDN
-- Instant API updates via `config.js` and cache invalidation
-
----
-
-## 🚀 Deployment
-
-### Prerequisites
-- AWS CLI configured with appropriate credentials  
-- Terraform >= 1.5  
-- A pre-trained model archive: `model.tar.gz` (Mobilenet V2)  
-
-### Steps
-
-```bash
-cd infra
-terraform init
-terraform apply -auto-approve
+```text
+.
+├── app/
+│   ├── Dockerfile
+│   └── src/
+│       └── server.js
+├── autosleep/
+│   └── auto_sleep.py                   # Lambda: auto-stop service after N minutes
+├── wake/
+│   └── lambda_function.py              # Lambda: scale-to-1 + redirect to task IP
+├── infra/
+│   └── main.tf                         # All Terraform in a single file
+├── .github/workflows/
+│   ├── ci.yml                          # CI — Build & Push to ECR
+│   ├── cd.yml                          # CD — Terraform Apply + Deploy/Destroy (ECS)
+│   └── ops.yml                         # OPS — Wake/Sleep ECS Service helpers
+└── make_zips.sh                        # Creates Lambda bundles: infra/wake.zip & infra/sleep.zip
 ```
 
-The comments for the commands above are intentionally placed **below** the block per your style preference.
+> If you only keep **`infra/main.tf`**, that’s fine — this repo is designed to work with just one TF file.
 
-After apply, Terraform will:  
-- Create IAM roles for SageMaker and Lambda  
-- Deploy the SageMaker model and endpoint (serverless)  
-- Configure API Gateway + Lambda proxy integration  
-- Upload `config.js` and invalidate CloudFront cache  
+---
 
-The static web app becomes available via the CloudFront domain.
+## 🏗️ Architecture (high-level)
+
+```mermaid
+flowchart LR
+  subgraph GH[GitHub]
+    CI[CI • Build & Push to ECR<br/>ci.yml]
+    CD[CD • Terraform Apply & Deploy<br/>cd.yml]
+    OPS[OPS • Wake / Sleep helpers<br/>ops.yml]
+  end
+
+  CI --> ECR[(ECR repo)]
+  CD --> TF[(Terraform)]
+  TF --> VPC[(VPC + Subnets + SG)]
+  TF --> ECS[ECS Cluster + Fargate Service]
+  TF --> CWL[CloudWatch Logs]
+  TF --> LWA[Lambda • Wake]
+  TF --> LAS[Lambda • Auto-sleep]
+  TF --> APIGW[API Gateway HTTP API]
+  TF --> EVB[EventBridge Rule]
+
+  APIGW --> LWA
+  EVB --> LAS
+  LWA -->|desiredCount=1| ECS
+  LAS -->|desiredCount=0| ECS
+
+  subgraph Runtime
+    ECS -->|public IP| Internet
+  end
+```
+
+---
+
+## 🌐 DNS (optional)
+
+- Purchased domain: **`ecs-demo.online`** (example).  
+- A-record (apex) → **API Gateway custom domain** (if you attach one), *or* use the native **API endpoint**.  
+- The **wake URL** returns a “warming up” page and then **redirects** to the current task public IP.
+
+> For this demo, the public check URL you can share is: **https://ecs-demo.online** (fronts the wake API).
+
+---
+
+## ⚙️ Prerequisites
+
+- **AWS account**, IAM role for GitHub OIDC (see `cd.yml`).
+- **S3** bucket + **DynamoDB** table for Terraform backend (already referenced in `main.tf`):
+  - Bucket: `docker-ecs-deployment`
+  - Table: `docker-ecs-deployment` (primary key: `LockID` as a string)
+- **ECR** repository name (default): `ecs-demo-app`
+- **Terraform** 1.6+ (locally or via GitHub Actions)
+- **Docker** (to build/push images locally if needed)
+- **Route 53 / Namecheap** (optional, for domain)
+
+---
+
+## 🔧 First-time setup (local)
+
+1) Create Lambda zips:
+```bash
+./make_zips.sh
+# → creates: infra/wake.zip and infra/sleep.zip
+```
+
+2) Initialize Terraform backend & providers:
+```bash
+cd infra
+terraform init -input=false
+```
+
+3) Apply infrastructure (creates VPC, ECS, ECR, Lambdas, API GW):
+```bash
+terraform apply -auto-approve -input=false
+```
+
+4) Build and push the image (local flow, optional — or use CI):
+```bash
+# login to ECR
+aws ecr get-login-password --region us-east-1 \
+| docker login --username AWS --password-stdin <ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com
+
+# build & push
+docker build -t ecs-demo-app:latest ./app
+docker tag ecs-demo-app:latest <ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/ecs-demo-app:latest
+docker push <ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/ecs-demo-app:latest
+```
+
+5) Wake the service in browser and you’ll be redirected to the running task:
+```
+https://ecs-demo.online
+```
+
+---
+
+## 🤖 GitHub Actions
+
+### CI — Build & Push to ECR (`.github/workflows/ci.yml`)
+- Builds `./app` into an image and pushes to ECR.
+- Outputs the full image URL `ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ecs-demo-app:<tag>`.
+
+### CD — Terraform Apply + Deploy/Destroy (ECS) (`.github/workflows/cd.yml`)
+- **Apply**: `terraform apply` + roll service to the image tag (or `latest`).
+- **Destroy**: scales service to 0, then `terraform destroy`.  
+- Prints the final **wake URL** and the **domain**: `https://ecs-demo.online`.
+
+### OPS — Wake/Sleep helpers (`.github/workflows/ops.yml`)
+- `wake`: calls the Wake URL (API GW) — useful for checks or previews.
+- `sleep`: sets `desiredCount=0` immediately.
+
+> All jobs use GitHub OIDC to assume **`github-actions-ecs-role`** in your AWS account.
+
+---
+
+## 🔍 Variables (Terraform)
+
+| Name                 | Type   | Default        | Description                                   |
+|----------------------|--------|----------------|-----------------------------------------------|
+| `project_name`       | string | `ecs-demo`     | Prefix for AWS resource names                 |
+| `region`             | string | `us-east-1`    | AWS region                                    |
+| `vpc_cidr`           | string | `10.20.0.0/16` | VPC CIDR                                      |
+| `public_subnets`     | list   | `["10.20.1.0/24", "10.20.2.0/24"]` | Two public subnets                 |
+| `desired_count`      | number | `0`            | 0 = idle, 1 = running                         |
+| `task_cpu`           | string | `256`          | Task CPU                                      |
+| `task_memory`        | string | `512`          | Task memory                                   |
+| `app_port`           | number | `80`           | Container port                                |
+| `ecr_repo_name`      | string | `ecs-demo-app` | ECR repo name                                 |
+| `enable_wake_api`    | bool   | `true`         | Create Wake Lambda + API GW                   |
+| `enable_auto_sleep`  | bool   | `true`         | Create Auto-sleep Lambda + EventBridge rule   |
+| `sleep_after_minutes`| number | `5`            | When to scale to 0                            |
+
+> Lambda env `WAIT_MS` in `main.tf` controls the **warm-up budget** shown on the waiting page.
+
+---
+
+## 💰 Cost notes
+
+- **Idle**: $0 for ECS/Fargate (desiredCount=0). You pay pennies for:
+  - Lambda invocations (wake/auto-sleep)
+  - API Gateway minimal traffic
+  - CloudWatch Logs
+  - S3+DynamoDB for Terraform backend
+  - Route 53 hosted zone (if used)
+- **Active**: Fargate task (0.25 vCPU / 0.5GB) while running.
+
+---
+
+## 🆘 Troubleshooting
+
+- **Waiting page loops forever**  
+  Increase `WAIT_MS` in Lambda env (via Terraform) to 120–180 seconds.
+- **Private IP in redirect**  
+  Ensure **`assign_public_ip = true`** for the ECS service (already set).
+- **Destroy fails on API GW stage**  
+  If you attached a custom domain (Route 53), remove **base path mappings** first, or use `-target` destroys.
 
 ---
 
 ## 🧹 Cleanup
 
 ```bash
+# scale down first (optional)
+aws ecs update-service --cluster ecs-demo-cluster --service ecs-demo-svc --desired-count 0 --region us-east-1
+
+# destroy infra
 cd infra
-terraform destroy -auto-approve
-```
-
-The comment for the command above is intentionally placed **below** the block per your style preference.
-
----
-
-## 💰 Cost Optimization
-
-| Service | Optimization Strategy | Description |
-|----------|----------------------|--------------|
-| **SageMaker** | Serverless Inference | Pay only for invocation time (no EC2 hosting) |
-| **Lambda** | Ephemeral execution | Scales automatically with requests |
-| **CloudFront** | CDN caching | Reduces S3 read and bandwidth costs |
-| **S3** | Static hosting | Very low cost for HTML/JS assets |
-| **API Gateway** | HTTP API | Cheaper and faster than REST API |
-| **Terraform** | Automated teardown | Easily destroy resources to stop billing |
-
-💡 *Tip:* You can use wake/sleep scripts or CI/CD triggers to deploy only during testing hours.
-
----
-
-## 🔮 Future Improvements
-
-- Add **CI/CD pipeline** via GitHub Actions for automated deploys  
-- Implement **authentication** (e.g., Cognito or IAM authorizers)  
-- Integrate **CloudWatch monitoring** for endpoint metrics  
-- Add **custom model training** and auto-upload to S3  
-- Introduce **multi-model endpoints** for dynamic model loading  
-- Optional **frontend enhancements** (drag & drop image upload, progress bar)
-
----
-
-## 🧰 Tech Stack
-
-| Category | Technology |
-|-----------|-------------|
-| **IaC** | Terraform |
-| **ML Hosting** | Amazon SageMaker Serverless |
-| **API Layer** | API Gateway (HTTP) + AWS Lambda |
-| **Frontend** | Amazon S3 + CloudFront |
-| **Language** | Python 3.10 |
-| **Infrastructure** | AWS (IAM, CloudWatch, S3, Lambda, SageMaker, API Gateway) |
-
----
-
-## 📂 Folder Structure
-
-```
-ml-sagemaker-serverless/
-├── frontend/                 # Static site (HTML, JS, CSS)
-│   ├── index.html
-│   ├── script.js
-│   └── style.css
-├── infra/                    # Terraform IaC (SageMaker, Lambda, API Gateway, S3, CF)
-│   ├── providers.tf
-│   ├── variables.tf
-│   ├── sagemaker_deploy.tf
-│   ├── api_and_config.tf
-│   ├── iam_lambda_invoke.tf
-│   ├── outputs.tf
-│   └── minimal.auto.tfvars
-├── mobilenet_sls/
-│   └── code/
-│       ├── inference.py
-│       └── requirements.txt
-├── scripts/
-│   └── inference_proxy.py
-└── docs/
-    ├── sagemaker-serverless-architecture.png
-    └── sagemaker-serverless-annotated.png
+terraform destroy -auto-approve -input=false
 ```
 
 ---
 
-## 🪪 License
+## 📝 License
 
-This project is distributed under the MIT License — feel free to use, modify, and adapt it for your own learning or deployment demos.
-
----
-
-> Designed for demonstration and portfolio purposes.  
-> Shows how to deploy a production-ready **serverless ML inference pipeline** using modern AWS services.
+MIT
