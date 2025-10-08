@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ruslan AWS 🚀 — Cat Classifier Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="logo">
+      <span class="logo-mark">🚀</span>
+      <span class="logo-text">Ruslan AWS</span>
+    </div>
+    <div class="rocket-wrapper" aria-hidden="true">
+      <svg class="rocket" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 2c8 4 16 12 22 22-6 4-14 6-22 6s-16-2-22-6C16 14 24 6 32 2z" fill="currentColor" />
+        <circle cx="32" cy="22" r="6" fill="#0ff" />
+        <path d="M20 34l-6 12 12-6 6 6 6-6 12 6-6-12" fill="#fff" opacity=".1" />
+      </svg>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="uploader">
+      <div id="drop" class="dropzone">
+        <input id="file" type="file" accept="image/*" hidden />
+        <div class="dz-inner">
+          <!-- 🐱 Top mascot: Thomas -->
+          <img class="dz-icon cat-icon" src="thomas.png" alt="Thomas the Cat">
+
+          <h1>Upload or drop an image</h1>
+          <p class="muted">PNG / JPG — the image stays in your browser; only pixels are sent to the API.</p>
+          <div class="actions">
+            <button id="choose" class="btn primary">Choose file</button>
+            <button id="predict" class="btn" disabled>Predict</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview appears only after a file is selected -->
+      <div class="preview">
+        <img id="preview" alt="preview">
+      </div>
+    </section>
+
+    <section class="results">
+      <h2>Top-5 predictions</h2>
+      <div id="results" class="results-list"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    Built with <strong>AWS SageMaker</strong> &amp; <strong>Lambda</strong> by <strong>Ruslan</strong> 🚀
+  </footer>
+
+  <script>
+    // Your deployed API Gateway endpoint (HTTP API v2)
+    window.DEMO_API_URL = "https://5p8wskbgr6.execute-api.us-east-1.amazonaws.com";
+  </script>
+  <script src="script.js"></script>
+</body>
+
+</html>
