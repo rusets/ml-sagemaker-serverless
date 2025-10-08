@@ -18,9 +18,16 @@ It combines **Amazon SageMaker Serverless Endpoints**, **AWS Lambda**, **API Gat
 
 ## 🏗️ Architecture
 
-<p align="center">
+<!-- ARCH_SCROLL_START -->
+<div style="max-width:100%; max-height:520px; overflow:auto; border:1px solid #e5e7eb; border-radius:8px;">
+  <a href="./docs/sagemaker-serverless-annotated.png">
+    <img src="./docs/sagemaker-serverless-annotated.png" alt="AWS Architecture Diagram" width="2400">
+  </a>
+</div>
+<p align="center"><em>Tip: scroll inside the frame to pan; click to open full-size and zoom.</em></p>
+<!-- ARCH_SCROLL_END -->
   <img src="./docs/sagemaker-serverless-annotated.png" alt="AWS Architecture Diagram" width="900"/>
-</p>
+<!-- ARCH_SCROLL_END -->
 
 ### Flow Summary
 
