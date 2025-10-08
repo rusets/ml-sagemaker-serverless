@@ -1,0 +1,50 @@
+# ---- Terraform ----
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ---- Model artifacts ----
+*.tar.gz
+models/
+infra/model.tar.gz
+mobilenet_sls/model.tar.gz
+
+# ---- Python cache ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+
+# ---- MacOS junk ----
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ---- Logs & temp ----
+*.log
+*.tmp
+*.swp
+
+# ---- Node/Frontend ----
+node_modules/
+dist/
+package-lock.json
+yarn.lock
+
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+*.code-workspace
+
+# ---- Other local ----
+*.zip
+*.bak
+*.old
