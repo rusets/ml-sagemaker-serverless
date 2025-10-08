@@ -15,9 +15,14 @@
 
 ## 📋 Overview
 
-This is a **production‑style, serverless image classification** project on AWS.  
-It deploys a pre‑trained **Mobilenet V2** on **Amazon SageMaker Serverless Inference**, exposed via **API Gateway + Lambda**, and a lightweight web UI served through **S3 + CloudFront**.  
-Infrastructure is defined with **Terraform** and delivered in a reproducible, auditable way (state in **S3** with locking in **DynamoDB**).
+A production‑style, serverless **image classification** project on AWS.  
+It deploys **Mobilenet V2** on **Amazon SageMaker Serverless Inference**, exposes it through **API Gateway + Lambda**, and serves a lightweight web UI via **S3 + CloudFront**.  
+Infrastructure is defined in **Terraform**, giving reproducible deployments, clear diff history, and easy teardown.
+
+**What this showcases**
+- Minimal latency serverless inference without managing servers.
+- Clean separation of concerns: static UI, API proxy, ML runtime.
+- Solid operational posture: least‑privilege IAM, encrypted state, explicit wiring between services.
 
 ---
 
@@ -32,9 +37,9 @@ flowchart LR
   CF --> APIGW["Amazon API Gateway<br/>HTTP API /predict"]
   APIGW --> LBD["AWS Lambda<br/>Proxy Python 3.12"]
   LBD --> SM["Amazon SageMaker<br/>Serverless Endpoint<br/>Mobilenet V2"]
-  SM -->|"Top‑5 JSON"| U
+  SM -->|"Top-5 JSON"| U
 
-  subgraph "IaC (Terraform)"
+  subgraph IaC_Terraform [IaC / Terraform]
     TF["Terraform"]
   end
   TF -.-> CF
@@ -44,7 +49,38 @@ flowchart LR
   TF -.-> SM
 ```
 
-**Flow:** The user opens the site (CloudFront → S3) and sends `POST /predict` (API Gateway). Lambda forwards payloads to **SageMaker Serverless**, retrieves Top‑5 predictions, and returns them to the browser. **Terraform** provisions all components and their integrations.
+**End‑to‑end flow**
+1. User opens the site (CloudFront → S3) and selects an image.  
+2. Browser sends a JSON payload (base64 image) to **`POST /predict`** on API Gateway.  
+3. **Lambda** validates/forwards the payload to **SageMaker Runtime**.  
+4. **SageMaker Serverless** returns Top‑5 predictions; Lambda relays JSON back to the browser.  
+5. **Terraform** provisions and wires all of the above (buckets, distribution, API, Lambda, roles, endpoint).
+
+---
+
+## ⚙️ Components (Detailed)
+
+**Frontend (S3 + CloudFront)**  
+- Static assets only; **`config.js`** holds the live API URL and is re‑uploaded during infra changes (with CloudFront invalidation).  
+- CORS enabled on API side; no secrets on the client.
+
+**API Layer (API Gateway HTTP API)**  
+- Lightweight edge endpoint for POST `/predict`.  
+- Simpler and cheaper than REST API for this use case.
+
+**Lambda Proxy (Python 3.12)**  
+- Thin adapter between API Gateway and SageMaker Runtime `InvokeEndpoint`.  
+- Handles base64 body, JSON marshalling, CORS response headers.  
+- Typical runtime settings here: **timeout ~30s**, **memory 512 MB** (tuned for low latency).
+
+**SageMaker Serverless Endpoint**  
+- **Mobilenet V2** (ImageNet) using CPU, pre‑ and post‑processing with `torchvision`.  
+- Sample sizing: **2048 MB Memory**, **Max Concurrency 1** (adjust per traffic).  
+- Pay‑per‑ms execution; no idle compute cost.
+
+**Terraform IaC**  
+- Single source of truth for the entire stack (buckets, distributions, API, Lambda, roles, endpoint).  
+- Uses data sources for existing resources and wires integrations and permissions explicitly.
 
 ---
 
@@ -77,42 +113,43 @@ flowchart LR
 └── README.md
 ```
 
-> **Terraform State:** stored remotely in **Amazon S3** (AES‑256 encrypted) with **DynamoDB** table for state locking. This prevents concurrent applies and guarantees consistency across team and CI/CD runs.
+> **Terraform state:** stored remotely in **Amazon S3** (AES‑256 server‑side encryption) with **DynamoDB** table for **state locking** — this prevents concurrent applies and guarantees consistency. The backend configuration lives in **`infra/backend.tf`**. (Кратко, без кода.)
 
 ---
 
-## ⚙️ Components
+## 🔒 Security & IAM (Expanded)
 
-- **Frontend (S3 + CloudFront)** — static, cached globally; `config.js` auto‑updated with the current API URL.  
-- **API Layer (API Gateway HTTP API)** — thin, cost‑efficient edge for POST `/predict`.  
-- **Lambda Proxy (Python 3.12)** — forwards JSON payloads to **SageMaker Runtime** `InvokeEndpoint`.  
-- **SageMaker Serverless Endpoint** — Mobilenet V2 (ImageNet); scales transparently with pay‑per‑ms billing.  
-- **Terraform IaC** — single source of truth for infra, roles, permissions and wiring.
+**Encryption & secrets**  
+- S3 buckets use server‑side encryption.  
+- Terraform state is encrypted (SSE‑S3) and versioned; operations use DynamoDB locks.  
+- Lambda environment variables are refreshed safely during updates to avoid stale KMS bindings.
 
----
+**IAM (least privilege)**  
+- **SageMaker execution role**: read **model artifacts** from S3 and **pull images** from ECR (read‑only).  
+- **Lambda execution role**: **only** `sagemaker:InvokeEndpoint` for the target endpoint ARN.  
+- **API Gateway → Lambda permission**: scoped to the specific API ID and route (`POST /predict`).  
+- Separation of duties across roles reduces blast radius and improves auditability.
 
-## 🔒 Security & IAM
-
-- **KMS & Lambda env:** updates reset KMS binding and environment variables in a controlled order to avoid stale encryption state.  
-- **Least‑privilege IAM:**  
-  - *SageMaker execution role* — read model artifacts from S3 and pull images from ECR (read‑only).  
-  - *Lambda execution role* — only `sagemaker:InvokeEndpoint` on the specific endpoint ARN.  
-  - *API Gateway → Lambda permission* — scoped to `POST /predict` for this API.
-
----
-
-## 💰 Cost Optimization
-
-- **SageMaker Serverless** — billed per request time (ms). No idle compute.  
-- **Lambda + HTTP API** — usage‑based and scales to zero; tune timeout/memory for latency vs cost.  
-- **CloudFront + S3** — global caching for static assets, reduced S3 reads and latency.  
-- **Artifacts** — compact, versioned model package to speed up deploys and minimize storage.
-
-Typical demo‑level spend: **~$1–1.5/month**.
+**Network & access**  
+- Public static UI; API Gateway controls public API entry.  
+- No VPC required for this demo; add VPC endpoints/security groups for private environments.
 
 ---
 
-## 🚀 Deploy / Destroy (quick)
+## 💰 Cost Optimization (Detailed)
+
+- **SageMaker Serverless**: pay per request time (ms). Start small (e.g., **2048 MB**, **Max Concurrency 1**) and scale per traffic.  
+- **Lambda**: tune memory/timeout to balance cold‑start and cost; keep the proxy thin.  
+- **API Gateway (HTTP API)**: cheaper than REST API for similar traffic; use it for simple JSON calls.  
+- **CloudFront + S3**: long TTLs for static assets; invalidate only `config.js` and `index.html` on deploy.  
+- **Storage**: keep model artifact compact and versioned (tens of MB); clean unused artifacts.  
+- **Observability**: short CloudWatch log retention for dev; add filters/alarms only as needed.
+
+Typical demo‑level spend: **~$1–1.5/month** with light traffic (varies by region/usage).
+
+---
+
+## 🚀 Deploy / Destroy (manual)
 
 ```bash
 cd infra
