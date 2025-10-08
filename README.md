@@ -15,35 +15,34 @@
 
 ## 📋 Overview
 
-This project demonstrates an **end‑to‑end serverless image classification pipeline** on AWS.
-It uses **Amazon SageMaker Serverless Inference** to host a pre‑trained **Mobilenet V2** model, integrated with **API Gateway**, **Lambda**, and a static web UI served via **CloudFront + S3** — all provisioned with **Terraform**.
+Production-style, serverless **image classification** pipeline on AWS: **SageMaker Serverless Inference** (Mobilenet V2) behind **API Gateway + Lambda**, with a static web UI via **S3 + CloudFront**. Infrastructure is fully automated using **Terraform** (state in S3, locks in DynamoDB).
 
 ---
 
 ## 🏗️ Architecture (High‑Level)
 
-```mermaid
-flowchart TD
-  classDef svc fill:#f8f9ff,stroke:#6366f1,stroke-width:1.2,rx:8,ry:8,color:#111827
-  classDef ext fill:#fff7ed,stroke:#fb923c,stroke-width:1.2,rx:8,ry:8,color:#111827
-  classDef data fill:#ecfdf5,stroke:#10b981,stroke-width:1.2,rx:8,ry:8,color:#111827
-  classDef infra fill:#eef2ff,stroke:#818cf8,stroke-width:1.2,rx:8,ry:8,color:#1e1b4b
+> Compact horizontal diagram (keeps README tidy). Terraform appears as the IaC orchestrator.
 
-  user((User / Browser)):::ext --> cf["Amazon CloudFront"]:::svc
-  cf --> s3["Amazon S3<br/>Static site + config.js"]:::data
-  cf --> apigw["Amazon API Gateway<br/>HTTP API"]:::svc
-  apigw --> lam["AWS Lambda<br/>Proxy (Python 3.12)"]:::svc
-  lam --> sm["Amazon SageMaker<br/>Serverless Endpoint<br/>Mobilenet V2"]:::svc
-  sm -->|JSON Top-5| user
-  tf["Terraform<br/>IaC Automation"]:::infra --> cf
-  tf --> apigw
-  tf --> lam
-  tf --> sm
-  tf --> s3
+```mermaid
+flowchart LR
+  User([User<br/>Browser]) --> CF[Amazon CloudFront]
+  CF --> S3[Amazon S3<br/>Static site + config.js]
+  CF --> APIGW[Amazon API Gateway<br/>HTTP API /predict]
+  APIGW --> LAMBDA[AWS Lambda<br/>Proxy (Python 3.12)]
+  LAMBDA --> SM[Amazon SageMaker<br/>Serverless Endpoint<br/>Mobilenet V2]
+  SM -->|Top‑5 JSON| User
+
+  subgraph IaC
+    TF[Terraform]
+  end
+  TF -.-> CF
+  TF -.-> S3
+  TF -.-> APIGW
+  TF -.-> LAMBDA
+  TF -.-> SM
 ```
 
-**Flow:** user opens the static site (CloudFront → S3) → sends `POST /predict` via API Gateway → Lambda forwards to **SageMaker Serverless** → predictions (Top‑5) returned to the browser.  
-All infrastructure is provisioned and managed by **Terraform** with remote state stored in **S3 (AES‑256 encrypted)** and **DynamoDB** for state locking.
+**Flow:** The user opens the site (CloudFront → S3) and issues a POST `/predict` (API Gateway). Lambda forwards payloads to **SageMaker Serverless**, receives Top‑5 predictions, and responds to the browser. **Terraform** provisions and wires all components.
 
 ---
 
@@ -82,7 +81,7 @@ All infrastructure is provisioned and managed by **Terraform** with remote state
 
 ## 🔒 Security & IAM
 
-- **KMS & Lambda env:** deployment pipeline resets KMS binding and environment variables in a controlled order to avoid stale encryption state during updates.  
+- **KMS & Lambda env:** updates reset KMS binding and environment variables in a controlled order to avoid stale encryption state.  
 - **Least‑privilege IAM:**  
   - *SageMaker execution role* — read model artifacts from S3 and pull images from ECR (read‑only).  
   - *Lambda execution role* — only `sagemaker:InvokeEndpoint` on the specific endpoint ARN.  
@@ -92,10 +91,12 @@ All infrastructure is provisioned and managed by **Terraform** with remote state
 
 ## 💰 Cost Optimization
 
-- **SageMaker Serverless** — pay per request (ms). No idle compute.  
-- **Lambda + HTTP API** — usage‑based, scales to zero.  
-- **CloudFront + S3** — low‑cost global static hosting with caching.  
-- **Config autogen** — `config.js` uploaded with `no-cache` + CloudFront invalidation.
+- **SageMaker Serverless** — billed per request time (ms). No idle compute.  
+- **Lambda + HTTP API** — usage‑based, scales to zero; minimize timeout/memory for latency/cost balance.  
+- **CloudFront + S3** — global caching for static assets, low egress and S3 GETs.  
+- **Small artifact (~tens of MB)** — efficient and versioned, reducing update overhead.
+
+Typical monthly cost for light demo traffic: **~$1–1.5/month**.
 
 ---
 
@@ -107,7 +108,7 @@ terraform apply -auto-approve
 # ...
 terraform destroy -auto-approve
 ```
-> Note: if you orchestrate SageMaker via CLI in `null_resource`, ensure your destroy path removes the endpoint/config/models or use native Terraform SageMaker resources.
+> If you orchestrate SageMaker via CLI in `null_resource`, ensure your destroy path removes endpoint/config/models; or switch to native Terraform SageMaker resources.
 
 ---
 
