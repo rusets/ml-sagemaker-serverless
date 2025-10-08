@@ -1,4 +1,4 @@
-# 🧠 SageMaker Serverless Demo (Mobilenet V2)
+# SageMaker Serverless Demo (Mobilenet V2)
 
 ![Terraform](https://img.shields.io/badge/IaC-Terraform-7B42BC?logo=terraform&logoColor=white)
 ![AWS](https://img.shields.io/badge/Cloud-AWS-FF9900?logo=amazonaws&logoColor=white)
@@ -21,10 +21,6 @@ This project demonstrates an **end-to-end serverless image classification pipeli
 It uses **Amazon SageMaker Serverless Inference** to host the pre-trained **Mobilenet V2** model, integrated with **API Gateway**, **Lambda**, and a **static web UI** deployed via **S3 + CloudFront** — all provisioned automatically with **Terraform**.
 
 The goal is to show how to deploy a **production-ready ML inference system** that’s fast, scalable, and cost-efficient — perfect for portfolios, demos, or internal proof-of-concept setups.
-
-<p align="center">
-  <img src="frontend/thomas.png" alt="Demo Screenshot" width="600"/>
-</p>
 
 ---
 
