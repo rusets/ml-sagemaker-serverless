@@ -8,10 +8,23 @@
 
 ---
 
+### 🌐 Live Demo
+- **Website:** [https://ml-demo.store/](https://ml-demo.store/)
+- **API Endpoint:** [`/predict`](https://222izyufsl.execute-api.us-east-1.amazonaws.com/predict)
+- **Model:** Mobilenet V2 (Image Classification)
+
+---
+
 ## 📋 Overview
 
-A minimal end-to-end **serverless image classification** demo using AWS services.  
-The project serves a simple web interface via **S3 + CloudFront** that connects through an **API Gateway** and **Lambda proxy** to an **Amazon SageMaker Serverless Endpoint** running **Mobilenet V2** for image recognition.
+This project demonstrates an **end-to-end serverless image classification pipeline** on AWS.  
+It uses **Amazon SageMaker Serverless Inference** to host the pre-trained **Mobilenet V2** model, integrated with **API Gateway**, **Lambda**, and a **static web UI** deployed via **S3 + CloudFront** — all provisioned automatically with **Terraform**.
+
+The goal is to show how to deploy a **production-ready ML inference system** that’s fast, scalable, and cost-efficient — perfect for portfolios, demos, or internal proof-of-concept setups.
+
+<p align="center">
+  <img src="frontend/thomas.png" alt="Demo Screenshot" width="600"/>
+</p>
 
 ---
 
@@ -48,23 +61,23 @@ flowchart LR
 
 ---
 
-## ✨ Features
+## ⚙️ How It Works
 
-- **Serverless** architecture — zero idle cost  
-- **Terraform** end-to-end provisioning  
-- **SageMaker Serverless Endpoint** for ML inference  
-- **API Gateway + Lambda** integration layer  
-- **S3 + CloudFront** for static web hosting  
-- Simple and cost-efficient ML deployment demo  
+1️⃣ **User** opens the static web UI (`index.html` + `script.js`) served via **CloudFront + S3**.  
+2️⃣ `config.js` contains the API URL (no-cache headers).  
+3️⃣ The browser sends an image URL to `POST /predict` on **API Gateway**.  
+4️⃣ **Lambda (inference proxy)** receives the request and invokes the **SageMaker Serverless Endpoint**.  
+5️⃣ **SageMaker** runs inference using the **Mobilenet V2** model.  
+6️⃣ The **predicted class and probability** are returned as a JSON response to the UI.
 
 ---
 
-## 🚀 Deployment
+## 🚀 Deployment (Terraform)
 
-**Requirements**
-- AWS CLI configured  
-- Terraform ≥ 1.5 installed  
-- Pre-trained model archive: `infra/model.tar.gz`  
+**Prerequisites**
+- AWS CLI configured
+- Terraform ≥ 1.5
+- A pre-trained `model.tar.gz` (Mobilenet V2) in the `infra/` directory
 
 ```bash
 cd infra
@@ -74,6 +87,13 @@ terraform apply -auto-approve
 
 The comments for the commands above are intentionally placed below the block per your style preference.
 
+Terraform provisions:
+- IAM roles for Lambda and SageMaker  
+- S3 bucket + CloudFront distribution  
+- API Gateway (HTTP API) and Lambda integration  
+- SageMaker model + endpoint (serverless)  
+- Uploads `config.js` and invalidates CloudFront cache
+
 ---
 
 ## 💰 Cost Optimization
@@ -81,11 +101,36 @@ The comments for the commands above are intentionally placed below the block per
 | Service | Optimization | Description |
 |----------|---------------|-------------|
 | **SageMaker** | Serverless Endpoint | Pay only for invocation time |
-| **Lambda** | On-demand execution | Auto-scales, no idle time |
-| **CloudFront** | CDN caching | Reduces S3 reads & latency |
-| **S3** | Static website | Low-cost storage for assets |
-| **API Gateway** | HTTP API | Cheaper than REST API |
-| **Terraform** | Easy teardown | Run destroy to stop charges |
+| **Lambda** | On-demand | Scales automatically with traffic |
+| **CloudFront** | CDN caching | Reduces S3 GETs and latency |
+| **S3** | Static site | Extremely low-cost hosting |
+| **API Gateway** | HTTP API | Cheaper and faster than REST |
+| **Terraform** | Destroy when idle | Clean teardown stops billing |
+
+💡 *Tip:* Ideal for demos or learning — infrastructure can be fully destroyed with one command when not in use.
+
+---
+
+## 🔮 Future Improvements
+
+- Automated **CI/CD** via GitHub Actions (plan/apply workflows)  
+- **Cognito** authentication for `/predict` requests  
+- **CloudWatch dashboards** for real-time metrics  
+- **Multi-model endpoint** deployment pattern  
+- Optional **SVG diagram** for ultra-sharp zoom in docs
+
+---
+
+## 🧰 Tech Stack
+
+| Category | Technology |
+|-----------|-------------|
+| **Infrastructure** | AWS (SageMaker, Lambda, API Gateway, S3, CloudFront, IAM) |
+| **IaC** | Terraform |
+| **CI/CD** | GitHub Actions |
+| **Language** | Python 3.10 (Lambda + inference) |
+| **Frontend** | HTML, CSS, JavaScript |
+| **Model** | Mobilenet V2 (Image classification) |
 
 ---
 
@@ -129,14 +174,15 @@ cd infra
 terraform destroy -auto-approve
 ```
 
-The comment for the command above is intentionally placed below the block.
+The comment for the command above is intentionally placed below the block per your style preference.
 
 ---
 
 ## 🪪 License
 
-MIT — use freely for demos and learning.
+MIT — Free to use, modify, and deploy for demos, learning, or portfolio purposes.
 
 ---
 
-> This project demonstrates a production-ready **serverless ML inference pipeline** using modern AWS services and Terraform.
+> 💡 **Project purpose:** Showcase how to deploy a real ML model using AWS Serverless architecture with Terraform automation.  
+> Ideal for DevOps and Cloud Engineer portfolios.
