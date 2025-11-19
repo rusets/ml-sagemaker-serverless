@@ -1,3 +1,8 @@
+############################################
+# Input Variables — Regions, Buckets, Names, Parameters
+# Defines external inputs for SageMaker, Lambda, API Gateway and CloudFront
+############################################
+
 variable "region" {
   type        = string
   default     = "us-east-1"
