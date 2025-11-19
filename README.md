@@ -12,10 +12,8 @@
 
 ## 🌐 Live Demo
 
--   **Website:** https://ml-demo.store\
--   **API Endpoint:** `POST /predict`\
-    https://222izyufsl.execute-api.us-east-1.amazonaws.com/predict
-
+-   **Website:** https://ml-demo.store
+   
 ------------------------------------------------------------------------
 
 ## 📋 Overview
@@ -167,7 +165,7 @@ This demonstrates the ability to take responsibility for an entire vertical slic
 ### **7. Creates strong opportunities for technical discussion**
 
 This project naturally leads to conversations about latency, scaling behavior, caching, cost optimization, observability, and architectural trade-offs — all topics interviewers value highly.
-------------------------------------------------------------------------
+ ------------------------------------------------------------------------
 
 # 📘 Lessons Learned
 
@@ -336,6 +334,45 @@ Yes --- with CI/CD, alarms, auth, and private endpoints it becomes a
 full production footprint.
 
 ------------------------------------------------------------------------
+
+## 📸 Screenshots
+
+Below are a few focused screenshots illustrating the core parts of the project.
+
+---
+
+### **UI — Prediction Result**
+
+Shows the full end-to-end workflow:  
+Image uploaded → API Gateway → Lambda proxy → SageMaker Serverless → Top-5 predictions.
+
+![UI Prediction](docs/screenshots/ui_prediction.png)
+
+---
+
+### **UI — Initial State (Before Upload)**
+
+Landing view of the frontend before selecting or dropping an image.
+
+![UI Empty](docs/screenshots/ui_empty.png)
+
+---
+
+### **SageMaker Endpoint — InService (CLI)**
+
+Demonstrates that the SageMaker Serverless endpoint is healthy and serving traffic.  
+All sensitive values are redacted.
+
+![SageMaker InService](docs/screenshots/sagemaker_inservice.png)
+
+---
+
+### **Terraform — Successful Apply**
+
+Shows that the entire infrastructure is synchronized and no drift is detected.  
+API URLs and IDs are masked so the screenshot is safe to publish.
+
+![Terraform Apply](docs/screenshots/terraform_apply.png)
 
 # 📜 License
 
