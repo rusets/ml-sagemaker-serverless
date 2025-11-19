@@ -128,44 +128,46 @@ flowchart LR
 
 ### **1. Demonstrates real production-level architecture**
 
-This is a complete end-to-end ML service with clean separation between frontend, API, and inference logic. It shows that you can design and operate a functional cloud-native system — not just run a SageMaker notebook.
+This is a complete end-to-end ML service with clean separation between the frontend, API layer, and inference logic.
+It shows that you can design and operate a genuine cloud-native system — not just run experiments inside SageMaker notebooks.
 
 ### **2. Shows strong AWS integration skills**
 
-CloudFront → S3 → API Gateway → Lambda → SageMaker → IAM → Terraform.  
-Few engineers can wire these components correctly. This project demonstrates that you understand how AWS services interact in a real environment.
+CloudFront → S3 → API Gateway → Lambda → SageMaker → IAM → Terraform.
+Correctly wiring these services together is non-trivial, and this project demonstrates practical understanding of how AWS components interact in real environments.
 
 ### **3. Modern serverless ML design**
 
-Fully serverless, low-maintenance, pay-per-request inference.  
-This aligns with how companies deploy lightweight production ML systems today.
+It uses a fully serverless, low-maintenance, pay-per-request architecture.
+This is exactly how companies deploy lightweight ML models in real production systems today.
 
 ### **4. Strong Infrastructure-as-Code discipline**
 
-Every part is reproducible.\
-No manual AWS clicks.\
-Remote state + DynamoDB locking.\
-Clear resource dependencies.\
-This signals reliability and readiness for team environments.
+Everything is reproducible.
+No manual AWS clicks.
+Remote state + DynamoDB locking.
+Clear resource dependencies and predictable deploys.
+This signals reliability and readiness for team-scale infrastructure work.
 
 ### **5. Reflects real engineering problem-solving**
 
-Cold starts\
-CORS rules\
-CloudFront caching\
-IAM permission failures\
-SageMaker endpoint update states\
-—all of these are typical real-world issues, and this project handles them correctly.
+Cold starts
+CORS behavior
+CloudFront caching
+IAM permission failures
+SageMaker endpoint update states
+—all of these are real industry problems, and the project shows that you can diagnose and solve them correctly.
 
 ### **6. Signals full-stack ownership**
 
-You built UI, backend, ML runtime, CI/CD, Terraform, security, IAM, and overall architecture.  
-This demonstrates the ability to take responsibility for an entire vertical slice of a system.
+You built the UI, backend API, ML runtime, CI/CD, Terraform infrastructure, IAM boundaries, and the overall system design.
+This demonstrates the ability to take responsibility for an entire vertical slice of a production application.
 
 ### **7. Creates strong opportunities for technical discussion**
 
-This project naturally leads to conversations about latency, scaling behavior, caching, cost optimization, observability, and architectural trade-offs — all topics interviewers value highly.
- ------------------------------------------------------------------------
+This project naturally invites conversations about latency, scaling characteristics, caching strategies, cost optimization, observability, and architectural trade-offs — all topics interviewers use to assess engineering depth.
+
+------------------------------------------------------------------------
 
 # 📘 Lessons Learned
 
