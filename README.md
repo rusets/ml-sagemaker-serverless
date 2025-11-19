@@ -342,6 +342,13 @@ full production footprint.
 Below are a few focused screenshots illustrating the core parts of the project.
 
 ---
+### **UI — Initial State (Before Upload)**
+
+Landing view of the frontend before selecting or dropping an image.
+
+![UI Empty](docs/screenshots/ui_empty.png)
+
+---
 
 ### **UI — Prediction Result**
 
@@ -349,14 +356,6 @@ Shows the full end-to-end workflow:
 Image uploaded → API Gateway → Lambda proxy → SageMaker Serverless → Top-5 predictions.
 
 ![UI Prediction](docs/screenshots/ui_prediction.png)
-
----
-
-### **UI — Initial State (Before Upload)**
-
-Landing view of the frontend before selecting or dropping an image.
-
-![UI Empty](docs/screenshots/ui_empty.png)
 
 ---
 
