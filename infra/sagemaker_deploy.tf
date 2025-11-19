@@ -1,10 +1,14 @@
+############################################
+# SageMaker Model & Endpoint Orchestration
+# Generates timestamped model/config names and updates the Endpoint via AWS CLI
+############################################
+
 locals {
   ts         = replace(replace(timestamp(), ":", ""), "Z", "")
   model_name = "${var.endpoint_name}-${local.ts}"
   cfg_name   = "${local.model_name}-cfg"
   image_uri  = "763104351884.dkr.ecr.${var.region}.amazonaws.com/pytorch-inference:2.1.0-cpu-py310-ubuntu20.04-sagemaker"
 }
-
 
 resource "null_resource" "sm_update" {
   triggers = {

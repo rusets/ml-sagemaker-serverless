@@ -1,4 +1,7 @@
-import os, json, base64, boto3
+import os
+import json
+import base64
+import boto3
 
 R = os.environ.get("REGION", "us-east-1")
 EP = os.environ["ENDPOINT_NAME"]
@@ -6,6 +9,7 @@ CT = "application/json"
 AC = "application/json"
 
 sm = boto3.client("sagemaker-runtime", region_name=R)
+
 
 def _resp(status, body):
     return {
@@ -18,6 +22,7 @@ def _resp(status, body):
         },
         "body": json.dumps(body)
     }
+
 
 def lambda_handler(event, ctx):
     if event.get("requestContext", {}).get("http", {}).get("method") == "OPTIONS":
@@ -35,7 +40,7 @@ def lambda_handler(event, ctx):
         out = resp["Body"].read().decode("utf-8")
         try:
             return _resp(200, json.loads(out))
-        except Exception:
+        except:
             return _resp(200, {"raw": out})
     except Exception as e:
         return _resp(500, {"error": str(e)})

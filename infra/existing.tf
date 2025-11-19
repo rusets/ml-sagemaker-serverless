@@ -1,3 +1,8 @@
+############################################
+# Data Sources — Existing AWS Resources
+# Provides account metadata, Lambda lookup and API Gateway info
+############################################
+
 data "aws_caller_identity" "me" {}
 
 data "aws_lambda_function" "proxy" {
