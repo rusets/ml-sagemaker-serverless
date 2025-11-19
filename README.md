@@ -4,6 +4,9 @@
 ![AWS](https://img.shields.io/badge/Cloud-AWS-FF9900?logo=amazonaws&logoColor=white)
 ![Python](https://img.shields.io/badge/Language-Python-3776AB?logo=python&logoColor=white)
 ![Serverless](https://img.shields.io/badge/Architecture-Serverless-FF4F00?logo=awslambda&logoColor=white)
+![SageMaker](https://img.shields.io/badge/SageMaker-Serverless-0073BB?logo=amazonaws&logoColor=white)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
+![Security](https://img.shields.io/badge/Security-IAM%20%7C%20KMS-2F4F4F?logo=amazonaws&logoColor=white)
 
 ------------------------------------------------------------------------
 
@@ -125,42 +128,45 @@ flowchart LR
 
 # 🎯 Why This Project Is Valuable for Interviews
 
-### **1. Shows true production thinking**
+### **1. Demonstrates real production-level architecture**
 
-This is not a toy demo --- it's a full ML service lifecycle.
+This is a complete end-to-end ML service with clean separation between frontend, API, and inference logic. It shows that you can design and operate a functional cloud-native system — not just run a SageMaker notebook.
 
-### **2. Demonstrates mastery of AWS components working together**
+### **2. Shows strong AWS integration skills**
 
-CloudFront → S3 → API Gateway → Lambda → SageMaker → IAM → Terraform.
+CloudFront → S3 → API Gateway → Lambda → SageMaker → IAM → Terraform.  
+Few engineers can wire these components correctly. This project demonstrates that you understand how AWS services interact in a real environment.
 
-### **3. Perfect example of modern serverless ML**
+### **3. Modern serverless ML design**
 
-Companies want minimal maintenance + low latency.
+Fully serverless, low-maintenance, pay-per-request inference.  
+This aligns with how companies deploy lightweight production ML systems today.
 
-### **4. Strong IaC discipline**
+### **4. Strong Infrastructure-as-Code discipline**
 
 Every part is reproducible.\
 No manual AWS clicks.\
-Remote state + locking.
+Remote state + DynamoDB locking.\
+Clear resource dependencies.\
+This signals reliability and readiness for team environments.
 
-### **5. Shows that you understand real-world problems**
+### **5. Reflects real engineering problem-solving**
 
 Cold starts\
-CORS\
+CORS rules\
 CloudFront caching\
-IAM failures\
-Endpoint update states\
----all solved correctly.
+IAM permission failures\
+SageMaker endpoint update states\
+—all of these are typical real-world issues, and this project handles them correctly.
 
-### **6. Signals ownership mindset**
+### **6. Signals full-stack ownership**
 
-You built UI, backend, ML, infra, security, IAM, UX.
+You built UI, backend, ML runtime, CI/CD, Terraform, security, IAM, and overall architecture.  
+This demonstrates the ability to take responsibility for an entire vertical slice of a system.
 
-### **7. Interviewers LOVE seeing this**
+### **7. Creates strong opportunities for technical discussion**
 
-This is the type of project Senior/Staff engineers bring as a reference
-architecture example.
-
+This project naturally leads to conversations about latency, scaling behavior, caching, cost optimization, observability, and architectural trade-offs — all topics interviewers value highly.
 ------------------------------------------------------------------------
 
 # 📘 Lessons Learned
