@@ -1,0 +1,60 @@
+name: IaC — Terraform Quality & Security
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+jobs:
+  iac_checks:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python (for checkov)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Install TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: Install tfsec
+        run: |
+          curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+          sudo mv tfsec /usr/local/bin/tfsec
+
+      - name: Install checkov
+        run: |
+          pip install --upgrade pip
+          pip install checkov
+
+      - name: Terraform fmt
+        run: terraform fmt -recursive
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: TFLint
+        run: tflint
+
+      - name: tfsec
+        run: tfsec .
+
+      - name: Checkov
+        run: checkov -d .

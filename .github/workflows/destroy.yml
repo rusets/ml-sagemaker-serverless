@@ -1,0 +1,48 @@
+name: Destroy — Terraform Destroy (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "DESTROY" to confirm'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  TF_WORKDIR: infra
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.inputs.confirm == 'DESTROY' }}
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKDIR }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::097635932419:role/ml-sagemaker-serverless-gha-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Terraform init
+        run: terraform init -upgrade
+
+      - name: Terraform destroy
+        run: terraform destroy -auto-approve
