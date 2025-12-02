@@ -47,6 +47,9 @@ jobs:
       - name: Terraform fmt
         run: terraform fmt -recursive
 
+      - name: Terraform init (providers only)
+        run: terraform init -backend=false -input=false
+
       - name: Terraform validate
         run: terraform validate
 
