@@ -57,7 +57,9 @@ jobs:
         run: tflint
 
       - name: tfsec
-        run: tfsec .
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: infra
 
       - name: Checkov
         run: checkov -d .
