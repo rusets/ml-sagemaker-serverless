@@ -2,9 +2,9 @@ name: IaC — Terraform Quality & Security
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch: {}
 
 jobs:
@@ -36,8 +36,9 @@ jobs:
 
       - name: Install tfsec
         run: |
-          curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
-          sudo mv tfsec /usr/local/bin/tfsec
+          mkdir -p $HOME/bin
+          curl -sSfL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | sh -s -- -b $HOME/bin
+          echo "$HOME/bin" >> $GITHUB_PATH
 
       - name: Install checkov
         run: |
