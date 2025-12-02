@@ -34,11 +34,10 @@ jobs:
         with:
           tflint_version: latest
 
-      - name: Install tfsec
-        run: |
-          mkdir -p $HOME/bin
-          curl -sSfL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | sh -s -- -b $HOME/bin
-          echo "$HOME/bin" >> $GITHUB_PATH
+      - name: tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: infra
 
       - name: Install checkov
         run: |
