@@ -8,8 +8,8 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
-# Keep the lock file committed (best practice)
-#! .terraform.lock.hcl
+# Ignore lock file (for this project)
+.terraform.lock.hcl
 
 # --- Python (lambda/inference) ---
 __pycache__/
