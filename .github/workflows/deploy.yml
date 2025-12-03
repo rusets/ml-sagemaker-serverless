@@ -15,6 +15,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      TF_VAR_api_id: ${{ secrets.TF_VAR_api_id }}
+      TF_VAR_cloudfront_distribution_id: ${{ secrets.TF_VAR_cloudfront_distribution_id }}
+      TF_VAR_serverless_memory_mb: ${{ secrets.TF_VAR_serverless_memory_mb }}
+      TF_VAR_serverless_max_conc: ${{ secrets.TF_VAR_serverless_max_conc }}
+
     defaults:
       run:
         working-directory: ${{ env.TF_WORKDIR }}
@@ -35,10 +41,10 @@ jobs:
           terraform_version: 1.9.0
 
       - name: Terraform init
-        run: terraform init -upgrade
+        run: terraform init -upgrade -input=false
 
       - name: Terraform plan
-        run: terraform plan
+        run: terraform plan -input=false -lock=false
 
       - name: Terraform apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -input=false
