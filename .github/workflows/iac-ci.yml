@@ -1,5 +1,8 @@
 name: IaC — Terraform Quality & Security
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: ["main"]
@@ -60,6 +63,8 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: infra
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkov
         run: checkov -d .

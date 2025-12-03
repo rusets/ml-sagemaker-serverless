@@ -23,7 +23,7 @@
 
 ---
 
-## **Live Demo:** [https://ml-demo.store](https://ml-demo.store)
+**Live Demo:** [https://ml-demo.store](https://ml-demo.store)
 
 A fully automated, production-grade **serverless ML application** running on AWS.  
 It performs **image classification** with **Mobilenet V2 (ImageNet)** deployed on  
