@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TF_VAR_api_id: ${{ secrets.TF_VAR_api_id }}
-      TF_VAR_cloudfront_distribution_id: ${{ secrets.TF_VAR_cloudfront_distribution_id }}
-      TF_VAR_serverless_memory_mb: ${{ secrets.TF_VAR_serverless_memory_mb }}
-      TF_VAR_serverless_max_conc: ${{ secrets.TF_VAR_serverless_max_conc }}
+      TF_VAR_api_id: ${{ secrets.ML_API_ID }}
+      TF_VAR_cloudfront_distribution_id: ${{ secrets.ML_CF_DISTRIBUTION_ID }}
+      TF_VAR_serverless_memory_mb: ${{ secrets.ML_SERVERLESS_MEMORY_MB }}
+      TF_VAR_serverless_max_conc: ${{ secrets.ML_SERVERLESS_MAX_CONC }}
 
     defaults:
       run:
