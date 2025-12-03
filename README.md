@@ -1,41 +1,47 @@
-# 🚀 SageMaker Serverless Demo --- Mobilenet V2 (End‑to‑End Production Stack)
+# SageMaker Serverless Demo Mobilenet V2 (End‑to‑End Production Stack)
 
-![Terraform](https://img.shields.io/badge/IaC-Terraform-7B42BC?logo=terraform&logoColor=white)
-![AWS](https://img.shields.io/badge/Cloud-AWS-FF9900?logo=amazonaws&logoColor=white)
-![Python](https://img.shields.io/badge/Language-Python-3776AB?logo=python&logoColor=white)
-![Serverless](https://img.shields.io/badge/Architecture-Serverless-FF4F00?logo=awslambda&logoColor=white)
-![SageMaker](https://img.shields.io/badge/SageMaker-Serverless-0073BB?logo=amazonaws&logoColor=white)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
-![Security](https://img.shields.io/badge/Security-IAM%20%7C%20KMS-2F4F4F?logo=amazonaws&logoColor=white)
+<p align="center">
+  <img src="https://img.shields.io/badge/IaC-Terraform-7B42BC?logo=terraform&logoColor=white" />
+  <img src="https://img.shields.io/badge/Cloud-AWS-FF9900?logo=amazonaws&logoColor=white" />
+  <img src="https://img.shields.io/badge/Compute-Lambda-FF9900?logo=awslambda&logoColor=white" />
+  <img src="https://img.shields.io/badge/API-API%20Gateway-FF4F00?logo=amazonaws&logoColor=white" />
+  <img src="https://img.shields.io/badge/CDN-CloudFront-8A2BE2?logo=amazonaws&logoColor=white" />
+  <img src="https://img.shields.io/badge/Storage-S3-569A31?logo=amazonaws&logoColor=white" />
+  <img src="https://img.shields.io/badge/ML-SageMaker%20Serverless-0073BB?logo=amazonaws&logoColor=white" />
+  <img src="https://img.shields.io/badge/Framework-PyTorch-EE4C2C?logo=pytorch&logoColor=white" />
+  <img src="https://img.shields.io/badge/Language-Python-3776AB?logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white" />
+  <img src="https://img.shields.io/badge/Security-IAM%20%7C%20OIDC-2F4F4F?logo=amazonaws&logoColor=white" />
+  <br/><br/>
+  <img src="https://img.shields.io/badge/terraform-fmt%20✔-623CE4?logo=terraform&logoColor=white" />
+  <img src="https://img.shields.io/badge/terraform-validate%20✔-623CE4?logo=terraform&logoColor=white" />
+  <img src="https://img.shields.io/badge/tflint-clean%20✔-2D76FF?logo=terraform&logoColor=white" />
+  <img src="https://img.shields.io/badge/tfsec-clean%20✔-FF4B4B?logo=trivy&logoColor=white" />
+  <img src="https://img.shields.io/badge/checkov-clean%20✔-00A75A?logo=checkov&logoColor=white" />
+  <img src="https://img.shields.io/badge/IaC%20Quality-100%25-4CAF50?logo=dependabot&logoColor=white" />
+</p>
 
-------------------------------------------------------------------------
+---
 
-## 🌐 Live Demo
+**Live Demo:** [https://ml-demo.store](https://ml-demo.store)
 
--   **Website:** https://ml-demo.store
-   
-------------------------------------------------------------------------
+A fully automated, production-grade **serverless ML application** running on AWS.  
+It performs **image classification** with **Mobilenet V2 (ImageNet)** deployed on  
+**SageMaker Serverless Inference**, exposed via **API Gateway + Lambda**,  
+and delivered globally through **CloudFront + S3** — all provisioned with **Terraform**.
 
-## 📋 Overview
+Key capabilities:
 
-A fully automated, production-style **serverless ML application** built
-on AWS.\
-The system performs **image classification** using **Mobilenet V2
-(ImageNet)** deployed on **Amazon SageMaker Serverless Inference**,
-wrapped with **API Gateway + Lambda**, served through **S3 +
-CloudFront**, and fully provisioned via **Terraform**.
+- **End-to-end Serverless Image Classification on AWS** - fully automated, fast, and production-ready.
+- **True serverless ML inference** — no EC2, no containers to manage  
+- **Clean full-pipeline flow:** browser → API → Lambda → SageMaker  
+- **Strong security posture:** least-privilege IAM, encrypted state, scoped permissions  
+- **Deterministic IaC:** reproducible deploys, remote state, DynamoDB locking  
+- **Optimized performance:** low latency, CDN caching, lightweight frontend
 
-This project demonstrates:
+---
 
--   Zero-server ML inference
--   Realistic production wiring across AWS services
--   Proper IAM, least privilege, encryption, and remote Terraform state
--   Clean frontend → backend → ML pipeline\
--   Fast, deterministic deployments
-
-------------------------------------------------------------------------
-
-## 🏗️ Architecture (High-Level)
+## **Architecture Overview**
 
 ``` mermaid
 flowchart LR
@@ -56,7 +62,24 @@ flowchart LR
   TF -.-> SM
 ```
 
-------------------------------------------------------------------------
+---
+
+## **Prerequisites**
+
+- **AWS CLI** installed and configured  
+- **Terraform ≥ 1.6**  
+- **AWS Provider ≥ 5.50**  
+- **Python 3.10+** (for local inference utilities)  
+- **GitHub Actions OIDC role** created (for CI/CD)  
+- Existing:  
+  - **S3 bucket** for static site  
+  - **CloudFront distribution**  
+  - **API Gateway HTTP API**  
+  - **S3 model artifacts bucket**  
+- Recommended local tools:  
+  - `tflint`  
+  - `tfsec`  
+  - `checkov`  
 
 ## ⚙️ Components
 
@@ -94,37 +117,238 @@ flowchart LR
 -   Role wiring, permissions, CloudFront invalidations\
 -   Null resources orchestrate SageMaker lifecycle
 
-------------------------------------------------------------------------
+---
 
-## 📁 Project Structure
+## **Quick Start**
 
-    .
-    ├── frontend/
-    │   ├── index.html
-    │   ├── script.js
-    │   ├── style.css
-    │   └── thomas.png
-    ├── infra/
-    │   ├── api_and_config.tf
-    │   ├── backend.tf
-    │   ├── existing.tf
-    │   ├── iam_lambda_invoke.tf
-    │   ├── minimal.auto.tfvars
-    │   ├── outputs.tf
-    │   ├── providers.tf
-    │   ├── sagemaker_deploy.tf
-    │   └── variables.tf
-    ├── mobilenet_sls/
-    │   └── code/
-    │       ├── inference.py
-    │       └── requirements.txt
-    ├── scripts/
-    │   └── inference_proxy.py
-    └── README.md
+### **Local Terraform Deployment**
+```bash
+cd infra
 
-------------------------------------------------------------------------
+terraform init
+terraform plan -out=tfplan
+terraform apply -auto-approve tfplan
+```
 
-# 🎯 Why This Project Is Valuable for Interviews
+---
+
+### **CI/CD Deployment (Recommended)**
+
+- Fully automated deployment pipeline using GitHub Actions  
+- Secure authentication via OIDC role (no long-lived AWS keys)  
+- Automatic linting and security checks for Terraform (fmt, validate, tflint, tfsec, checkov)  
+- Infrastructure changes are planned and applied through pull requests  
+- Destroy workflow available for clean environment teardown  
+- Ensures consistent, reproducible, and auditable deployments  
+
+---
+
+## **Key AWS Services Used**
+
+| Service                    | Purpose                                                                  |
+|----------------------------|--------------------------------------------------------------------------|
+| **Amazon SageMaker**       | Serverless inference (Mobilenet V2)                                      |
+| **AWS Lambda**             | Proxy layer for invoking the SageMaker endpoint                          |
+| **API Gateway (HTTP API)** | Lightweight public API for `/predict`                                    |
+| **Amazon S3**              | Static frontend hosting + storage for model artifacts                    |
+| **S3 SSE-S3 (AES-256)**    | Server-side encryption for Terraform remote state                        |
+| **Amazon CloudFront**      | Global CDN for serving UI with caching + invalidations                   |
+| **AWS IAM**                | Least-privilege access for Lambda, SageMaker, API Gateway                |
+| **GitHub Actions**         | CI/CD pipelines: fmt, validate, tflint, tfsec, checkov, deploy/destroy   |
+| **Terraform**              | Full IaC provisioning of all AWS resources                               |
+
+---
+
+## **Default Timings (Current Configuration)**
+
+- **Lambda proxy timeout:** 30 seconds  
+- **Lambda proxy memory:** 512 MB  
+- **SageMaker serverless memory:** 2048 MB  
+- **SageMaker max concurrency:** 1 concurrent request  
+
+---
+
+## **Application Layer**
+
+- **Frontend (S3 + CloudFront)** — static HTML/CSS/JS UI with drag-and-drop upload, config.js API injection, and CloudFront caching.
+- **API Gateway (HTTP API)** — lightweight public entrypoint for `/predict` with automatic CORS.
+- **Lambda Proxy (Python 3.12)** — forwards request body directly to SageMaker Runtime, returns JSON response.
+- **SageMaker Serverless Endpoint** — Mobilenet V2 inference, ImageNet preprocessing, CPU-optimized serverless scaling.
+
+---
+
+## **Project Structure**
+```text
+
+ml-sagemaker-serverless/
+├── frontend/              # Static UI (HTML, CSS, JS)
+├── infra/                 # Terraform — full IaC stack
+├── mobilenet_sls/         # SageMaker inference code (PyTorch)
+├── scripts/               # Lambda proxy script
+├── docs/                  # Architecture, ADRs, runbooks, diagrams
+├── .github/               # Workflows + issue/PR templates
+├── LICENSE                # MIT license
+└── README.md              # Main project documentation
+
+```
+
+**Full detailed structure:** see [`docs/architecture.md`](./docs/architecture.md)
+
+---
+
+## **Documentation**
+
+All production-grade documentation for this project is located in the `docs/` directory.  
+It covers architecture, decisions, operations, troubleshooting, cost, and security — everything a reviewer or interviewer needs.
+
+---
+
+### **Architecture**
+- **High-Level Architecture** — [`docs/architecture.md`](./docs/architecture.md)
+- **System Diagrams**
+  - Architecture (high-level) — [`docs/diagrams/architecture-high-level.md`](./docs/diagrams/architecture-high-level.md)
+  - CI/CD OIDC Workflow — [`docs/diagrams/ci-cd-oidc-workflow.md`](./docs/diagrams/ci-cd-oidc-workflow.md)
+  - Inference Data Flow — [`docs/diagrams/inference-data-flow.md`](./docs/diagrams/inference-data-flow.md)
+
+---
+
+### **ADR — Architecture Decision Records**
+- **ADR-001—Serverless vs Realtime**  
+  [`docs/adr/ADR-001 — Serverless vs Realtime.md`](./docs/adr/ADR-001%20—%20Serverless%20vs%20Realtime.md)
+
+- **ADR-002—Lambda Proxy Choice**  
+  [`docs/adr/ADR-002 — Lambda Proxy Choice.md`](./docs/adr/ADR-002%20—%20Lambda%20Proxy%20Choice.md)
+
+- **ADR-003—CloudFront + S3 as Static Layer**  
+  [`docs/adr/ADR-003 — CloudFront + S3.md`](./docs/adr/ADR-003%20—%20CloudFront%20+%20S3.md)
+
+- **ADR-004—Terraform Null-Resource vs Native SM Resources**  
+  [`docs/adr/ADR-004 — Terraform Null vs Native.md`](./docs/adr/ADR-004%20—%20Terraform%20Null%20vs%20Native.md)
+
+- **ADR-005—Mobilenet V2 Model Choice**  
+  [`docs/adr/ADR-005 — Mobilenet V2 Choice.md`](./docs/adr/ADR-005%20—%20Mobilenet%20V2%20Choice.md)
+
+---
+
+### **Runbooks**
+- **Wake Failure (API → Lambda → SageMaker)**  
+  [`docs/runbooks/wake-failure.md`](./docs/runbooks/wake-failure.md)
+
+- **Destroy Not Triggered (Terraform pipelines)**  
+  [`docs/runbooks/destroy-not-triggered.md`](./docs/runbooks/destroy-not-triggered.md)
+
+- **Rollback Procedure (Endpoint / Config / Model)**  
+  [`docs/runbooks/rollback.md`](./docs/runbooks/rollback.md)
+
+---
+
+### **Monitoring & SLO**
+- **Monitoring Strategy** — [`docs/monitoring.md`](./docs/monitoring.md)  
+- **Service Level Objectives (SLO/SLI)** — [`docs/slo.md`](./docs/slo.md)
+
+---
+
+### **Cost & Governance**
+- **Cost Model & Optimization** — [`docs/cost.md`](./docs/cost.md)  
+- **Deployment Strategies** — [`docs/deployment-strategies.md`](./docs/deployment-strategies.md)  
+- **Threat Model / Security Review** — [`docs/threat-model.md`](./docs/threat-model.md)
+- **Interview Prep Notes:** [`docs/interview.md`](./docs/interview.md)
+- **Security Overview** — [`docs/security.md`](./docs/security.md)
+
+---
+
+## **Cost Optimization Principles**
+
+- Serverless pay-per-request: no idle compute.  
+- Right-sized SageMaker Serverless (CPU-only, tuned memory/concurrency).  
+- HTTP API instead of REST for lower cost and latency.  
+- Minimal Lambda logic → smaller cold starts and cheaper execution.  
+- CloudFront caching & targeted invalidations reduce S3/API traffic.  
+- S3 for static hosting = negligible cost.  
+- Terraform remote state on S3 + DynamoDB = lowest-maintenance backend.
+
+---
+
+## **Terraform CI**
+
+### **Overview**
+- CI runs on every PR touching `infra/**` or CI configs.  
+- Ensures formatting, validation, linting, and security checks are clean before deploy.
+
+### **Tested Versions**
+- Terraform: **1.6.6**, **1.8.5**, **1.9.0**.
+
+### **Checks**
+- `terraform fmt`  
+- `terraform init -backend=false` + `validate`  
+- `tflint`  
+- `tfsec`  
+- `checkov`
+
+### **Failure Behavior**
+- Any failed check blocks merge.
+- Deployment workflows do not run until CI is green.
+
+---
+
+## **Rollout & Rollback Strategy**
+
+### **Rollout**
+- Terraform builds a timestamped Model + EndpointConfig.
+- Endpoint is updated in-place and Terraform waits for **InService**.
+- `config.js` is regenerated and CloudFront invalidates only changed paths.
+
+### **Rollback**
+- Previous Models and EndpointConfigs are kept (timestamped).
+- Rollback = switch Endpoint to a known-good config or re-apply an older commit.
+- CloudFront invalidates minimal files for immediate UI sync.
+
+### **Safety**
+- Deploy completes only when SageMaker reports **InService**.
+- Old versions stay available for instant rollback.
+- No breaking API changes (stable JSON contract).
+
+---
+
+## **Production Scaling Plan**
+
+### **High Availability**
+- All core components (API Gateway, Lambda, SageMaker Serverless, S3, CloudFront) are multi-AZ by default.
+- No single point of failure; static UI remains globally accessible via CloudFront even during partial outages.
+
+### **Disaster Recovery**
+- Model artifacts can be replicated via S3 CRR.
+- Full regional failover = update region + replicate artifacts + re-apply Terraform.
+
+### **Capacity Planning**
+- Tune SageMaker Serverless: `MemorySizeInMB` + `MaxConcurrency`.
+- API Gateway, Lambda, and CloudFront auto-scale without manual configuration.
+
+### **Security Hardening**
+- Narrower IAM permissions, optional WAF, CloudFront OAC.
+- Stronger S3 public-access controls for frontend hosting.
+
+### **Network Segmentation (Future)**
+- Move Lambda + SageMaker into private subnets.
+- Add VPC Endpoints for API Gateway → Lambda → SageMaker.
+
+---
+
+### **Why This Matters for This Project**
+
+For an ML system combining API Gateway → Lambda → SageMaker Serverless → CloudFront,
+a single misconfigured IAM policy, missing endpoint permission, or invalid TF syntax can break:
+
+- model deployment  
+- endpoint updates  
+- Lambda → SageMaker invocation flow  
+- CloudFront config generation  
+
+CI ensures deterministic, secure, and production-grade infrastructure updates every time.
+
+---
+
+#  Why This Project Is Valuable for Interviews
 
 ### **1. Demonstrates real production-level architecture**
 
@@ -167,151 +391,21 @@ This demonstrates the ability to take responsibility for an entire vertical slic
 
 This project naturally invites conversations about latency, scaling characteristics, caching strategies, cost optimization, observability, and architectural trade-offs — all topics interviewers use to assess engineering depth.
 
-------------------------------------------------------------------------
+---
 
-# 📘 Lessons Learned
+## **Future Improvements (Interview-Oriented)**
 
-### 1) IAM is simple until it breaks
+- **Observability:** unified logs/metrics/traces, JSON logging, latency + cold-start metrics.  
+- **SLO-Based Alerts:** API 5xx, Lambda errors/throttles, SageMaker failures, CloudFront origin errors.  
+- **Multi-Env Setup:** separate Prod/Staging/Sandbox accounts, OIDC-based cross-account deploys.  
+- **Drift Detection:** scheduled `terraform plan` and automated drift reports in CI.  
+- **Zero-Downtime Deploys:** staged rollout for SageMaker (new config → gradual traffic shift → quick rollback).  
+- **Security Hardening:** tighter IAM, optional WAF, automated secret scanning.  
+- **Operational Maturity:** versioned model registry, consistent tagging, cost anomaly alerts.
 
-You solved APIGW → Lambda permissions, Lambda → SageMaker invoke,
-SageMaker → ECR.
+---
 
-### 2) Serverless ML is about orchestration, not models
-
-Endpoint states, rollbacks, timestamped configs --- handled perfectly.
-
-### 3) CloudFront is always aggressively cached
-
-You learned invalidation strategy.
-
-### 4) Lambda should stay thin
-
-You moved inference to SageMaker --- correct decision.
-
-### 5) Terraform requires structure
-
-You enforced consistent headers, naming, and separated IAM, data
-sources, SM logic.
-
-### 6) Integration is harder than ML
-
-Base64 decoding, JSON body, content types, error handling.
-
-### 7) Stability comes from anticipating edge cases
-
-You handled "Failed", "Updating", "Missing", and "InService" logic.
-
-### 8) End‑to‑end ownership is your strongest skill
-
-This project proves it.
-
-------------------------------------------------------------------------
-
-# 🧪 Troubleshooting --- Problems & How They Were Solved
-
-### **Problem: API Gateway returned 403 / 500**
-
-**Fix:** Missing IAM permission for Lambda → added exact ARN-based
-`InvokeEndpoint`.
-
-------------------------------------------------------------------------
-
-### **Problem: Lambda cannot call SageMaker endpoint**
-
-**Fix:** Wrong exec role name extraction → added role parsing logic via
-`split("/")`.
-
-------------------------------------------------------------------------
-
-### **Problem: CloudFront kept serving old config.js**
-
-**Fix:** Added automatic invalidation in Terraform after config update.
-
-------------------------------------------------------------------------
-
-### **Problem: Endpoint stuck in "Updating" or "Failed"**
-
-**Fix:** Created robust state machine in Bash:\
-- If Failed → delete & recreate\
-- If Creating/Updating → wait\
-- If Missing → create\
-- Finally: wait until InService
-
-------------------------------------------------------------------------
-
-### **Problem: CORS errors in the browser**
-
-**Fix:** Added correct headers in Lambda `_resp()`.
-
-------------------------------------------------------------------------
-
-### **Problem: Terraform drift from existing resources**
-
-**Fix:** Added data sources + consistent naming + removed duplicate IAM
-resources.
-
-------------------------------------------------------------------------
-
-# 🛠️ Deployment
-
-``` bash
-cd infra
-terraform init
-terraform apply -auto-approve
-```
-
-Destroy:
-
-``` bash
-terraform destroy -auto-approve
-```
-
-------------------------------------------------------------------------
-
-# 💰 Cost Optimization
-
--   Serverless pay-per-ms\
--   Lambda lightweight, no heavy dependencies\
--   HTTP API (cheaper than REST API)\
--   CloudFront long TTL except config.js\
--   Small model artifact\
--   Minimal concurrency
-
-Real‑world cost: **\~\$1--1.5/month**.
-
-------------------------------------------------------------------------
-
-# 🔮 Future Work (What I Would Improve Next)
-
-### **1) Add CI/CD (GitHub Actions → OIDC → Terraform Apply)**
-
-Full automation for PR → plan → approve → apply.
-
-### **2) Add autoscaling policies for endpoint**
-
-Dynamic memory / concurrency tuning.
-
-### **3) Add S3 versioned model registry**
-
-Better lineage + rollback support.
-
-### **4) Add CloudWatch Alarms**
-
--   Lambda errors\
--   Endpoint invocation failures\
--   Latency spikes
-
-### **5) Add custom domain for API Gateway**
-
-Better UX + easier integration.
-
-### **6) Add WebSocket for real-time inference logs**
-
-For advanced observability.
-
-------------------------------------------------------------------------
-
-# ❓ FAQ
+#  FAQ
 
 ### **Why SageMaker Serverless instead of Lambda-only inference?**
 
@@ -335,9 +429,9 @@ Prevent conflicts, allow rollbacks, ensure deterministic updates.
 Yes --- with CI/CD, alarms, auth, and private endpoints it becomes a
 full production footprint.
 
-------------------------------------------------------------------------
+---
 
-## 📸 Screenshots
+##  Screenshots
 
 Below are a few focused screenshots illustrating the core parts of the project.
 
@@ -375,8 +469,34 @@ API URLs and IDs are masked so the screenshot is safe to publish.
 
 ![Terraform Apply](docs/screenshots/terraform_apply.png)
 
-# 📜 License
+---
 
-- Released under the **MIT License** — free to use, modify, and learn from.
-- © Ruslan Dashkin (“🚀 Ruslan AWS”).
-- The “🚀 Ruslan AWS” branding and all related visuals are protected; commercial reuse or rebranding is prohibited without permission.
+# **Summary**
+
+This project delivers a complete, production-style serverless ML pipeline on AWS.  
+It demonstrates strong cloud engineering skills, IaC discipline, and real care for  
+security, scalability, cost efficiency, and operational clarity.
+
+### **Key highlights**
+- End-to-end serverless architecture (CloudFront → S3 → API Gateway → Lambda → SageMaker)  
+- Fully automated deployments using Terraform and GitHub Actions OIDC  
+- Clean separation of frontend, API, and inference workloads  
+- Realistic operational practices: caching, permissions, state locking, invalidations  
+- Thoughtful documentation: ADRs, runbooks, diagrams, monitoring, SLO, threat model  
+
+
+---
+
+## **Author & Portfolio**
+
+Portfolio website: https://rusets.com  
+More real AWS, DevOps, IaC, and automation projects by **Ruslan AWS**.
+
+---
+
+## License
+
+Released under the MIT License.  
+See the LICENSE file for full details.
+
+Branding name “🚀 Ruslan AWS” and related visuals may not be reused or rebranded without permission.

@@ -43,3 +43,6 @@ Thumbs.db
 # --- Archives (keep model if stored intentionally) ---
 # *.tar.gz
 # *.zip
+
+#infra/minimal.auto.tfvars
+*.auto.tfvars
