@@ -40,10 +40,11 @@
 
 ---
 
-## **CI/CD (Future)**
-- IaC CI: `fmt`, `validate`, `tflint`, `tfsec`, `checkov`, `plan`.
-- `apply` on main (manual approval).
-- Optional `deploy.yml` / `destroy.yml`.
+## **CI/CD**
+- Full Terraform CI: `fmt`, `validate`, `tflint`, `tfsec`, `checkov`, `plan`.
+- Manual-approval workflow for safe `apply` on main.
+- `deploy.yml` and `destroy.yml` workflows included.
+- All workflows authenticated via GitHub OIDC (no static AWS keys).
 
 ---
 
