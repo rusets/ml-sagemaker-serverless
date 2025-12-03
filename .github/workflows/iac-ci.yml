@@ -56,6 +56,9 @@ jobs:
       - name: Terraform validate
         run: terraform validate
 
+      - name: Terraform plan
+        run: terraform plan -lock=false -input=false
+
       - name: TFLint
         run: tflint
 
