@@ -143,8 +143,6 @@ ml-sagemaker-serverless/
 └── README.md              # Main project documentation
 ```
 
-**Full detailed structure:** see [`docs/architecture.md`](./docs/architecture.md)
-
 ---
 
 ## Documentation
